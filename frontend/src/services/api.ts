@@ -41,6 +41,12 @@ export const authApi = {
   logout: () => api.post('/auth/logout'),
   updateProfile: (data: { name?: string; password?: string; currentPassword?: string }) =>
     api.put('/auth/profile', data),
+  forgotPassword: (email: string) =>
+    api.post('/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) =>
+    api.post('/auth/reset-password', { token, password }),
+  validateResetToken: (token: string) =>
+    api.get('/auth/validate-reset-token', { params: { token } }),
 };
 
 // Time Entries

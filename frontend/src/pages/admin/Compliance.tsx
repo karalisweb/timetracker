@@ -133,42 +133,44 @@ export default function Compliance() {
       </div>
 
       {/* Export card */}
-      <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+      <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 sm:p-6">
         <h2 className="font-semibold text-white mb-4 flex items-center">
           <Download className="h-5 w-5 mr-2 text-gray-400" />
           Export CSV
         </h2>
-        <div className="flex items-end gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Da</label>
-            <input
-              type="date"
-              value={exportFrom}
-              onChange={(e) => setExportFrom(e.target.value)}
-              className="px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">A</label>
-            <input
-              type="date"
-              value={exportTo}
-              onChange={(e) => setExportTo(e.target.value)}
-              className="px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div className="flex-1 grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Da</label>
+              <input
+                type="date"
+                value={exportFrom}
+                onChange={(e) => setExportFrom(e.target.value)}
+                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">A</label>
+              <input
+                type="date"
+                value={exportTo}
+                onChange={(e) => setExportTo(e.target.value)}
+                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
           </div>
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 font-medium disabled:opacity-50 transition-colors"
+            className="w-full sm:w-auto px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 font-medium disabled:opacity-50 transition-colors"
           >
             {isExporting ? 'Esportazione...' : 'Scarica CSV'}
           </button>
         </div>
       </div>
 
-      {/* Users table */}
-      <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
+      {/* Users table - Desktop */}
+      <div className="hidden md:block bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-dark-700">
             <thead className="bg-dark-850">
@@ -262,6 +264,62 @@ export default function Compliance() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Users cards - Mobile */}
+      <div className="md:hidden space-y-3">
+        {data.users.map((user) => {
+          const compliancePercent = Math.round(
+            (user.closedDaysThisWeek / user.workingDaysCount) * 100
+          );
+          const minutesPercent = Math.round(
+            (user.totalMinutesThisWeek / user.weeklyTargetMinutes) * 100
+          );
+
+          return (
+            <div key={user.userId} className="bg-dark-800 rounded-xl border border-dark-700 p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-medium text-white truncate">{user.name}</h3>
+                  <p className="text-sm text-gray-400 truncate">{user.email}</p>
+                </div>
+                {user.weekSubmitted ? (
+                  <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 shrink-0">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    Inviata
+                  </span>
+                ) : (
+                  <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 shrink-0">
+                    <Clock className="h-3 w-3 mr-1" />
+                    In attesa
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-gray-400">Giornate: </span>
+                  <span className={`font-medium ${
+                    compliancePercent >= 80 ? 'text-green-400' :
+                    compliancePercent >= 50 ? 'text-yellow-400' : 'text-red-400'
+                  }`}>
+                    {user.closedDaysThisWeek}/{user.workingDaysCount}
+                  </span>
+                  <span className="text-gray-500 ml-1">({compliancePercent}%)</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Minuti: </span>
+                  <span className={`font-medium ${
+                    minutesPercent >= 80 ? 'text-green-400' :
+                    minutesPercent >= 50 ? 'text-yellow-400' : 'text-red-400'
+                  }`}>
+                    {formatMinutes(user.totalMinutesThisWeek)}
+                  </span>
+                  <span className="text-gray-500 ml-1">/ {formatMinutes(user.weeklyTargetMinutes)}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

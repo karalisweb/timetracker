@@ -164,8 +164,8 @@ export default function UsersPage() {
         </button>
       </div>
 
-      {/* Table */}
-      <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
+      {/* Table - Desktop */}
+      <div className="hidden md:block bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-dark-700">
             <thead className="bg-dark-850">
@@ -223,6 +223,48 @@ export default function UsersPage() {
         </div>
       </div>
 
+      {/* Cards - Mobile */}
+      <div className="md:hidden space-y-3">
+        {users.map((user) => (
+          <div key={user.id} className="bg-dark-800 rounded-xl border border-dark-700 p-4">
+            <div className="flex items-start justify-between mb-3">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-medium text-white truncate">{user.name}</h3>
+                <p className="text-sm text-gray-400 truncate">{user.email}</p>
+              </div>
+              <span className={`ml-2 inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 ${
+                user.role === 'admin'
+                  ? 'bg-purple-500/20 text-purple-400'
+                  : 'bg-blue-500/20 text-blue-400'
+              }`}>
+                {user.role === 'admin' ? 'Admin' : 'Collaboratore'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <div className="text-gray-400">
+                <span>{user.workStartTime} - {user.workEndTime}</span>
+                <span className="mx-2">•</span>
+                <span>{Math.floor(user.dailyTargetMinutes / 60)}h {user.dailyTargetMinutes % 60}m</span>
+              </div>
+              <div className="flex items-center">
+                <button
+                  onClick={() => handleEdit(user)}
+                  className="text-gray-400 hover:text-blue-400 p-2 transition-colors"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => handleDelete(user.id)}
+                  className="text-gray-400 hover:text-red-400 p-2 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 overflow-y-auto py-8">
@@ -236,8 +278,8 @@ export default function UsersPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">Nome</label>
                   <input
@@ -260,7 +302,7 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
                     Password {editingId && '(lascia vuoto per non modificare)'}
@@ -288,7 +330,7 @@ export default function UsersPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Giorni lavorativi</label>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {DAYS.map((day) => (
                     <button
                       key={day.value}
@@ -306,7 +348,7 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">Inizio lavoro</label>
                   <input
@@ -337,7 +379,7 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">Slack User ID</label>
                   <input

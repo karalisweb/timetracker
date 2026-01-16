@@ -181,7 +181,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">
             {isToday ? 'Oggi' : format(new Date(selectedDate), 'EEEE d MMMM', { locale: it })}
@@ -195,16 +195,16 @@ export default function Dashboard() {
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
           max={format(new Date(), 'yyyy-MM-dd')}
-          className="px-3 py-2 bg-dark-800 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full sm:w-auto px-3 py-2 bg-dark-800 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
 
       {/* Summary card */}
       {summary && (
-        <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center shrink-0">
                 <Clock className="h-6 w-6 text-blue-400" />
               </div>
               <div>
@@ -217,7 +217,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <span className={`px-3 py-1.5 rounded-lg text-sm font-medium ${getStatusColor(summary.status)}`}>
+            <span className={`self-start sm:self-auto px-3 py-1.5 rounded-lg text-sm font-medium ${getStatusColor(summary.status)}`}>
               {getStatusLabel(summary.status)}
             </span>
           </div>
@@ -233,7 +233,7 @@ export default function Dashboard() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="text-sm">
               {summary.isComplete ? (
                 <span className="flex items-center text-green-400">
@@ -251,14 +251,14 @@ export default function Dashboard() {
             {summary.status === 'open' ? (
               <button
                 onClick={() => setShowCloseModal(true)}
-                className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 font-medium transition-colors"
+                className="w-full sm:w-auto px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 font-medium transition-colors"
               >
                 Chiudi giornata
               </button>
             ) : (
               <button
                 onClick={handleReopenDay}
-                className="px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 font-medium transition-colors"
+                className="w-full sm:w-auto px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 font-medium transition-colors"
               >
                 Riapri giornata
               </button>
@@ -289,8 +289,8 @@ export default function Dashboard() {
         {/* Form */}
         {showForm && (
           <form onSubmit={handleSubmit} className="p-4 bg-dark-850 border-b border-dark-700">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="sm:col-span-2 md:col-span-1">
                 <label className="block text-sm font-medium text-gray-300 mb-1">
                   Progetto
                 </label>
@@ -324,7 +324,7 @@ export default function Dashboard() {
                 />
               </div>
 
-              <div>
+              <div className="sm:col-span-2 md:col-span-1">
                 <label className="block text-sm font-medium text-gray-300 mb-1">
                   Note (opzionale)
                 </label>
@@ -337,7 +337,7 @@ export default function Dashboard() {
                 />
               </div>
 
-              <div className="flex items-end space-x-2">
+              <div className="flex items-end space-x-2 sm:col-span-2 md:col-span-1">
                 <button
                   type="submit"
                   disabled={isSubmitting}

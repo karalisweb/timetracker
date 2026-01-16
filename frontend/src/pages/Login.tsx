@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Clock, AlertCircle } from 'lucide-react';
 
@@ -86,6 +86,12 @@ export default function Login() {
               {isLoading ? 'Accesso in corso...' : 'Accedi'}
             </button>
           </form>
+
+          <div className="mt-4 text-center">
+            <Link to="/forgot-password" className="text-sm text-amber-500 hover:text-amber-400">
+              Password dimenticata?
+            </Link>
+          </div>
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-4">
