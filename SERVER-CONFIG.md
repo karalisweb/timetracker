@@ -31,6 +31,18 @@
 | **Database** | PostgreSQL (`gadsaudit`) |
 | **Nginx Config** | `/etc/nginx/sites-available/gads.karalisdemo.it` |
 
+### 3. Time Report
+| Parametro | Valore |
+|-----------|--------|
+| **URL Pubblico** | https://timereport.karalisdemo.it |
+| **Porta Backend** | 3004 |
+| **Directory Backend** | `/root/time-report/backend` |
+| **Directory Frontend** | `/var/www/time-report` (build statico) |
+| **PM2 Name** | time-report |
+| **Database** | PostgreSQL (`timereport`) |
+| **Nginx Config** | `/etc/nginx/sites-available/timereport.karalisdemo.it` |
+| **Admin Login** | admin@karalisweb.it / Admin2026! |
+
 ---
 
 ## Porte Utilizzate
@@ -43,6 +55,7 @@
 | 3001 | GADS Audit 2 | Backend NestJS |
 | 3002 | (libera) | Riservata per Karalisweb Finance |
 | 3003 | (libera) | Riservata per CRM |
+| 3004 | Time Report | Backend NestJS |
 
 ---
 
@@ -138,6 +151,21 @@ psql -U gadsaudit -d gadsaudit
 pg_dump -U gadsaudit gadsaudit > backup.sql
 ```
 
+### Time Report (PostgreSQL)
+- Host: localhost
+- Port: 5432
+- User: timereport
+- Password: TimeReport2026
+- Database: timereport
+
+```bash
+# Accesso
+psql -U timereport -d timereport
+
+# Backup
+pg_dump -U timereport timereport > backup-timereport.sql
+```
+
 ---
 
 ## Note Importanti
@@ -149,4 +177,4 @@ pg_dump -U gadsaudit gadsaudit > backup.sql
 
 ---
 
-*Ultimo aggiornamento: 14 Gennaio 2026*
+*Ultimo aggiornamento: 16 Gennaio 2026*
