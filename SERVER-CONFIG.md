@@ -35,6 +35,7 @@
 | Parametro | Valore |
 |-----------|--------|
 | **URL Pubblico** | https://timereport.karalisdemo.it |
+| **GitHub Repo** | https://github.com/karalisweb/timetracker |
 | **Porta Backend** | 3004 |
 | **Directory Backend** | `/root/time-report/backend` |
 | **Directory Frontend** | `/var/www/time-report` (build statico) |
@@ -119,6 +120,10 @@ cd /root/gads-audit-2/backend && git pull && npm install && npm run build && pm2
 # GADS Audit 2 Frontend (rebuild statico)
 cd /root/gads-audit-2/frontend && git pull && npm install && npm run build
 cp -r dist/* /var/www/gads-audit/
+
+# Time Report (da locale con deploy.sh)
+cd /Users/alessio/Desktop/Sviluppo\ App\ Claude\ Code/Time\ Tracker
+./deploy.sh
 ```
 
 ---
