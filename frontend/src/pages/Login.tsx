@@ -27,19 +27,21 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Clock className="h-12 w-12 text-blue-600" />
+            <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center">
+              <Clock className="h-8 w-8 text-white" />
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Time Report</h1>
-          <p className="text-gray-600 mt-2">Accedi per registrare le tue ore</p>
+          <h1 className="text-2xl font-bold text-white">Time Report</h1>
+          <p className="text-gray-400 mt-2">Accedi per registrare le tue ore</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-8">
+        <div className="bg-dark-800 rounded-xl border border-dark-700 p-8">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center text-red-700">
+            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center text-red-400">
               <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
@@ -47,7 +49,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
                 Email
               </label>
               <input
@@ -56,13 +58,13 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2.5 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-dark-500"
                 placeholder="nome@azienda.it"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                 Password
               </label>
               <input
@@ -71,7 +73,7 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2.5 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-dark-500"
                 placeholder="••••••••"
               />
             </div>
@@ -79,7 +81,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 px-4 bg-amber-500 text-black font-medium rounded-lg hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-dark-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? 'Accesso in corso...' : 'Accedi'}
             </button>
@@ -87,7 +89,7 @@ export default function Login() {
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-4">
-          Karalisweb - Time Report MVP
+          Karalisweb - Time Report v1.0
         </p>
       </div>
     </div>

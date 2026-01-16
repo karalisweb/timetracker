@@ -54,36 +54,36 @@ export default function Week() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'closed_complete':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+        return <CheckCircle2 className="h-5 w-5 text-green-400" />;
       case 'closed_incomplete':
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+        return <AlertCircle className="h-5 w-5 text-yellow-400" />;
       default:
-        return <Clock className="h-5 w-5 text-gray-400" />;
+        return <Clock className="h-5 w-5 text-gray-500" />;
     }
   };
 
   const getStatusBg = (status: string) => {
     switch (status) {
       case 'closed_complete':
-        return 'bg-green-50 border-green-200';
+        return 'bg-green-500/10 border-green-500/30';
       case 'closed_incomplete':
-        return 'bg-yellow-50 border-yellow-200';
+        return 'bg-yellow-500/10 border-yellow-500/30';
       default:
-        return 'bg-white border-gray-200';
+        return 'bg-dark-800 border-dark-700';
     }
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
       </div>
     );
   }
 
   if (!weekData) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-gray-400">
         Errore nel caricamento dei dati
       </div>
     );
@@ -97,21 +97,21 @@ export default function Week() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Settimana corrente</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-2xl font-bold text-white">Settimana corrente</h1>
+          <p className="text-gray-400 text-sm">
             {format(parseISO(weekData.weekStart), 'd MMM', { locale: it })} -{' '}
             {format(parseISO(weekData.weekEnd), 'd MMM yyyy', { locale: it })}
           </p>
         </div>
         {weekData.submitted ? (
-          <span className="flex items-center px-4 py-2 bg-green-50 text-green-700 rounded-lg font-medium">
+          <span className="flex items-center px-4 py-2 bg-green-500/20 text-green-400 rounded-lg font-medium">
             <CheckCircle2 className="h-5 w-5 mr-2" />
             Inviata
           </span>
         ) : (
           <button
             onClick={() => setShowSubmitModal(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            className="flex items-center px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 font-medium transition-colors"
           >
             <Send className="h-5 w-5 mr-2" />
             Invia settimana
@@ -119,26 +119,39 @@ export default function Week() {
         )}
       </div>
 
-      {/* Summary card */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="grid grid-cols-3 gap-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900">
-              {formatMinutes(weekData.totalMinutes)}
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-dark-800 rounded-xl border border-dark-700 p-5">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <Clock className="h-5 w-5 text-blue-400" />
             </div>
-            <div className="text-sm text-gray-500 mt-1">Totale settimana</div>
+            <div>
+              <p className="text-gray-400 text-sm">Totale settimana</p>
+              <p className="text-2xl font-bold text-white">{formatMinutes(weekData.totalMinutes)}</p>
+            </div>
           </div>
-          <div className="text-center border-x">
-            <div className="text-3xl font-bold text-gray-900">
-              {closedDays}/{workingDays}
+        </div>
+        <div className="bg-dark-800 rounded-xl border border-dark-700 p-5">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+              <CheckCircle2 className="h-5 w-5 text-green-400" />
             </div>
-            <div className="text-sm text-gray-500 mt-1">Giornate chiuse</div>
+            <div>
+              <p className="text-gray-400 text-sm">Giornate chiuse</p>
+              <p className="text-2xl font-bold text-white">{closedDays}/{workingDays}</p>
+            </div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900">
-              {weekData.days.reduce((sum, d) => sum + d.entriesCount, 0)}
+        </div>
+        <div className="bg-dark-800 rounded-xl border border-dark-700 p-5">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+              <Calendar className="h-5 w-5 text-purple-400" />
             </div>
-            <div className="text-sm text-gray-500 mt-1">Registrazioni</div>
+            <div>
+              <p className="text-gray-400 text-sm">Registrazioni</p>
+              <p className="text-2xl font-bold text-white">{weekData.days.reduce((sum, d) => sum + d.entriesCount, 0)}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -152,22 +165,22 @@ export default function Week() {
           return (
             <div
               key={day.date}
-              className={`rounded-lg border p-4 ${getStatusBg(day.status)} ${
-                isWeekend ? 'opacity-60' : ''
+              className={`rounded-xl border p-4 ${getStatusBg(day.status)} ${
+                isWeekend ? 'opacity-50' : ''
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-gray-700">{getDayName(day.dayOfWeek)}</span>
+                <span className="font-medium text-gray-300">{getDayName(day.dayOfWeek)}</span>
                 {getStatusIcon(day.status)}
               </div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">
+              <div className="text-2xl font-bold text-white mb-1">
                 {format(dateObj, 'd')}
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-400">
                 {day.minutes > 0 ? formatMinutes(day.minutes) : '-'}
               </div>
               {day.entriesCount > 0 && (
-                <div className="text-xs text-gray-400 mt-1">
+                <div className="text-xs text-gray-500 mt-1">
                   {day.entriesCount} {day.entriesCount === 1 ? 'entry' : 'entries'}
                 </div>
               )}
@@ -178,7 +191,7 @@ export default function Week() {
 
       {/* Submit info */}
       {weekData.submitted && weekData.submittedAt && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-700 text-sm">
+        <div className="bg-green-500/20 border border-green-500/30 rounded-xl p-4 text-green-400 text-sm">
           <CheckCircle2 className="h-5 w-5 inline mr-2" />
           Settimana inviata il{' '}
           {format(parseISO(weekData.submittedAt), "d MMMM yyyy 'alle' HH:mm", { locale: it })}
@@ -187,31 +200,33 @@ export default function Week() {
 
       {/* Submit modal */}
       {showSubmitModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 max-w-md w-full mx-4">
             <div className="flex items-center mb-4">
-              <Calendar className="h-8 w-8 text-blue-600 mr-3" />
-              <h3 className="text-lg font-semibold text-gray-900">Invia settimana</h3>
+              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mr-3">
+                <Calendar className="h-6 w-6 text-blue-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white">Invia settimana</h3>
             </div>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-300 mb-4">
               Stai per inviare il report della settimana dal{' '}
-              <strong>{format(parseISO(weekData.weekStart), 'd MMM', { locale: it })}</strong> al{' '}
-              <strong>{format(parseISO(weekData.weekEnd), 'd MMM', { locale: it })}</strong>.
+              <strong className="text-white">{format(parseISO(weekData.weekStart), 'd MMM', { locale: it })}</strong> al{' '}
+              <strong className="text-white">{format(parseISO(weekData.weekEnd), 'd MMM', { locale: it })}</strong>.
             </p>
-            <div className="bg-gray-50 rounded-lg p-3 mb-4">
+            <div className="bg-dark-700 rounded-lg p-3 mb-4">
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
-                  <span className="text-gray-500">Totale:</span>
-                  <span className="ml-2 font-medium">{formatMinutes(weekData.totalMinutes)}</span>
+                  <span className="text-gray-400">Totale:</span>
+                  <span className="ml-2 font-medium text-white">{formatMinutes(weekData.totalMinutes)}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Giornate chiuse:</span>
-                  <span className="ml-2 font-medium">{closedDays}/{workingDays}</span>
+                  <span className="text-gray-400">Giornate chiuse:</span>
+                  <span className="ml-2 font-medium text-white">{closedDays}/{workingDays}</span>
                 </div>
               </div>
             </div>
             {closedDays < workingDays && (
-              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm flex items-start">
+              <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-yellow-400 text-sm flex items-start">
                 <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
                 <span>
                   Attenzione: non tutte le giornate lavorative sono state chiuse.
@@ -221,14 +236,14 @@ export default function Week() {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowSubmitModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 transition-colors"
               >
                 Annulla
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 disabled:opacity-50 transition-colors"
               >
                 {isSubmitting ? 'Invio...' : 'Conferma invio'}
               </button>

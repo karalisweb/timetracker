@@ -7,6 +7,7 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isLoading: boolean;
   isAdmin: boolean;
 }
@@ -60,10 +61,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user');
   };
 
+  const refreshUser = async () => {
+    try {
+      const { data } = await authApi.me();
+      setUser(data);
+      localStorage.setItem('user', JSON.stringify(data));
+    } catch {
+      // Ignora errori
+    }
+  };
+
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading, isAdmin }}>
+    <AuthContext.Provider value={{ user, token, login, logout, refreshUser, isLoading, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

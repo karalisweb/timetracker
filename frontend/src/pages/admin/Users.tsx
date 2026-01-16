@@ -142,7 +142,7 @@ export default function UsersPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
       </div>
     );
   }
@@ -151,13 +151,13 @@ export default function UsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-          <UsersIcon className="h-7 w-7 mr-3 text-blue-600" />
+        <h1 className="text-2xl font-bold text-white flex items-center">
+          <UsersIcon className="h-7 w-7 mr-3 text-orange-400" />
           Gestione Utenti
         </h1>
         <button
           onClick={handleCreate}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+          className="flex items-center px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 font-medium transition-colors"
         >
           <Plus className="h-5 w-5 mr-2" />
           Nuovo utente
@@ -165,53 +165,53 @@ export default function UsersPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-dark-700">
+            <thead className="bg-dark-850">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ruolo</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Orario</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Target</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Azioni</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Nome</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Email</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase">Ruolo</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase">Orario</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase">Target</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">Azioni</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-dark-700">
               {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                <tr key={user.id} className="hover:bg-dark-750 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap font-medium text-white">
                     {user.name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-400">
                     {user.email}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       user.role === 'admin'
-                        ? 'bg-purple-100 text-purple-800'
-                        : 'bg-blue-100 text-blue-800'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : 'bg-blue-500/20 text-blue-400'
                     }`}>
                       {user.role === 'admin' ? 'Admin' : 'Collaboratore'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-gray-500 text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-center text-gray-400 text-sm">
                     {user.workStartTime} - {user.workEndTime}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-center text-gray-400">
                     {Math.floor(user.dailyTargetMinutes / 60)}h {user.dailyTargetMinutes % 60}m
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <button
                       onClick={() => handleEdit(user)}
-                      className="text-gray-400 hover:text-blue-600 p-1"
+                      className="text-gray-400 hover:text-blue-400 p-1 transition-colors"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(user.id)}
-                      className="text-gray-400 hover:text-red-600 p-1 ml-2"
+                      className="text-gray-400 hover:text-red-400 p-1 ml-2 transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -225,13 +225,13 @@ export default function UsersPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto py-8">
-          <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b flex items-center justify-between sticky top-0 bg-white">
-              <h2 className="text-lg font-semibold">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 overflow-y-auto py-8">
+          <div className="bg-dark-800 rounded-xl border border-dark-700 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-dark-700 flex items-center justify-between sticky top-0 bg-dark-800">
+              <h2 className="text-lg font-semibold text-white">
                 {editingId ? 'Modifica utente' : 'Nuovo utente'}
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -239,30 +239,30 @@ export default function UsersPage() {
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Nome</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
                   <input
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
                     Password {editingId && '(lascia vuoto per non modificare)'}
                   </label>
                   <input
@@ -270,15 +270,15 @@ export default function UsersPage() {
                     required={!editingId}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ruolo</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Ruolo</label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="collaborator">Collaboratore</option>
                     <option value="admin">Admin</option>
@@ -287,17 +287,17 @@ export default function UsersPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Giorni lavorativi</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Giorni lavorativi</label>
                 <div className="flex gap-2">
                   {DAYS.map((day) => (
                     <button
                       key={day.value}
                       type="button"
                       onClick={() => toggleDay(day.value)}
-                      className={`px-3 py-2 rounded-md text-sm font-medium ${
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         formData.workingDays.includes(day.value)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-amber-500 text-black'
+                          : 'bg-dark-700 text-gray-400 hover:bg-dark-600'
                       }`}
                     >
                       {day.label}
@@ -308,52 +308,52 @@ export default function UsersPage() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Inizio lavoro</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Inizio lavoro</label>
                   <input
                     type="time"
                     value={formData.workStartTime}
                     onChange={(e) => setFormData({ ...formData, workStartTime: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Fine lavoro</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Fine lavoro</label>
                   <input
                     type="time"
                     value={formData.workEndTime}
                     onChange={(e) => setFormData({ ...formData, workEndTime: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Target giornaliero (min)</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Target giornaliero (min)</label>
                   <input
                     type="number"
                     min="1"
                     value={formData.dailyTargetMinutes}
                     onChange={(e) => setFormData({ ...formData, dailyTargetMinutes: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Slack User ID</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Slack User ID</label>
                   <input
                     type="text"
                     value={formData.slackUserId}
                     onChange={(e) => setFormData({ ...formData, slackUserId: e.target.value })}
                     placeholder="U01234ABCDE"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-dark-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Canale reminder</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Canale reminder</label>
                   <select
                     value={formData.reminderChannel}
                     onChange={(e) => setFormData({ ...formData, reminderChannel: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     {REMINDER_CHANNELS.map((c) => (
                       <option key={c.value} value={c.value}>{c.label}</option>
@@ -362,18 +362,18 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t">
+              <div className="flex justify-end gap-3 pt-4 border-t border-dark-700">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 transition-colors"
                 >
                   Annulla
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center"
+                  className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 disabled:opacity-50 flex items-center transition-colors"
                 >
                   <Check className="h-4 w-4 mr-2" />
                   {editingId ? 'Salva modifiche' : 'Crea utente'}

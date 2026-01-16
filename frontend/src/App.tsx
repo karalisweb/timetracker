@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Week from './pages/Week';
+import SettingsPage from './pages/Settings';
 import Compliance from './pages/admin/Compliance';
 import UsersPage from './pages/admin/Users';
 import ProjectsPage from './pages/admin/Projects';
@@ -88,6 +89,7 @@ function AppRoutes() {
       >
         <Route index element={<Dashboard />} />
         <Route path="week" element={<Week />} />
+        <Route path="settings" element={<SettingsPage />} />
 
         {/* Admin routes */}
         <Route

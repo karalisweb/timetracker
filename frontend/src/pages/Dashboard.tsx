@@ -147,11 +147,11 @@ export default function Dashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'closed_complete':
-        return 'text-green-600 bg-green-50';
+        return 'text-green-400 bg-green-500/20';
       case 'closed_incomplete':
-        return 'text-yellow-600 bg-yellow-50';
+        return 'text-yellow-400 bg-yellow-500/20';
       default:
-        return 'text-blue-600 bg-blue-50';
+        return 'text-blue-400 bg-blue-500/20';
     }
   };
 
@@ -169,7 +169,7 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
       </div>
     );
   }
@@ -180,13 +180,13 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Date selector */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-white">
             {isToday ? 'Oggi' : format(new Date(selectedDate), 'EEEE d MMMM', { locale: it })}
           </h1>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-400 text-sm">
             {format(new Date(selectedDate), 'dd/MM/yyyy')}
           </p>
         </div>
@@ -195,32 +195,37 @@ export default function Dashboard() {
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
           max={format(new Date(), 'yyyy-MM-dd')}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 bg-dark-800 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
 
       {/* Summary card */}
       {summary && (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
-              <div className="flex items-center text-gray-600">
-                <Clock className="h-5 w-5 mr-2" />
-                <span className="text-2xl font-bold text-gray-900">
-                  {formatMinutes(summary.totalMinutes)}
-                </span>
-                <span className="text-gray-400 ml-2">/ {formatMinutes(summary.targetMinutes)}</span>
+              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                <Clock className="h-6 w-6 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Ore registrate</p>
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-bold text-white">
+                    {formatMinutes(summary.totalMinutes)}
+                  </span>
+                  <span className="text-gray-500 ml-2">/ {formatMinutes(summary.targetMinutes)}</span>
+                </div>
               </div>
             </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(summary.status)}`}>
+            <span className={`px-3 py-1.5 rounded-lg text-sm font-medium ${getStatusColor(summary.status)}`}>
               {getStatusLabel(summary.status)}
             </span>
           </div>
 
           {/* Progress bar */}
-          <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+          <div className="w-full bg-dark-700 rounded-full h-2 mb-4">
             <div
-              className={`h-3 rounded-full transition-all ${
+              className={`h-2 rounded-full transition-all ${
                 summary.isComplete ? 'bg-green-500' : 'bg-blue-500'
               }`}
               style={{ width: `${progressPercent}%` }}
@@ -229,14 +234,14 @@ export default function Dashboard() {
 
           {/* Actions */}
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-500">
+            <div className="text-sm">
               {summary.isComplete ? (
-                <span className="flex items-center text-green-600">
+                <span className="flex items-center text-green-400">
                   <CheckCircle2 className="h-4 w-4 mr-1" />
                   Target raggiunto!
                 </span>
               ) : (
-                <span className="flex items-center">
+                <span className="flex items-center text-gray-400">
                   <Target className="h-4 w-4 mr-1" />
                   Mancano {formatMinutes(summary.targetMinutes - summary.totalMinutes)}
                 </span>
@@ -246,14 +251,14 @@ export default function Dashboard() {
             {summary.status === 'open' ? (
               <button
                 onClick={() => setShowCloseModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 font-medium transition-colors"
               >
                 Chiudi giornata
               </button>
             ) : (
               <button
                 onClick={handleReopenDay}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium"
+                className="px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 font-medium transition-colors"
               >
                 Riapri giornata
               </button>
@@ -263,9 +268,9 @@ export default function Dashboard() {
       )}
 
       {/* Time entries */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="font-semibold text-gray-900">Registrazioni</h2>
+      <div className="bg-dark-800 rounded-xl border border-dark-700">
+        <div className="p-4 border-b border-dark-700 flex items-center justify-between">
+          <h2 className="font-semibold text-white">Registrazioni</h2>
           {summary?.status === 'open' && (
             <button
               onClick={() => {
@@ -273,7 +278,7 @@ export default function Dashboard() {
                 setEditingId(null);
                 setFormData({ projectId: '', durationMinutes: '', notes: '' });
               }}
-              className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+              className="flex items-center px-3 py-1.5 bg-amber-500 text-black rounded-lg hover:bg-amber-600 text-sm font-medium transition-colors"
             >
               <Plus className="h-4 w-4 mr-1" />
               Aggiungi
@@ -283,17 +288,17 @@ export default function Dashboard() {
 
         {/* Form */}
         {showForm && (
-          <form onSubmit={handleSubmit} className="p-4 bg-gray-50 border-b">
+          <form onSubmit={handleSubmit} className="p-4 bg-dark-850 border-b border-dark-700">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Progetto
                 </label>
                 <select
                   required
                   value={formData.projectId}
                   onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Seleziona...</option>
                   {projects.map((p) => (
@@ -305,7 +310,7 @@ export default function Dashboard() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Durata (minuti)
                 </label>
                 <input
@@ -314,20 +319,20 @@ export default function Dashboard() {
                   min="1"
                   value={formData.durationMinutes}
                   onChange={(e) => setFormData({ ...formData, durationMinutes: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="60"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Note (opzionale)
                 </label>
                 <input
                   type="text"
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Descrizione attività..."
                 />
               </div>
@@ -336,7 +341,7 @@ export default function Dashboard() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 font-medium disabled:opacity-50 transition-colors"
                 >
                   <Check className="h-4 w-4 inline mr-1" />
                   {editingId ? 'Salva' : 'Aggiungi'}
@@ -347,7 +352,7 @@ export default function Dashboard() {
                     setShowForm(false);
                     setEditingId(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -358,48 +363,48 @@ export default function Dashboard() {
 
         {/* Entries list */}
         {entries.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <Clock className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-            <p>Nessuna registrazione per questa giornata</p>
+          <div className="p-8 text-center">
+            <Clock className="h-12 w-12 mx-auto mb-3 text-gray-500" />
+            <p className="text-gray-400">Nessuna registrazione per questa giornata</p>
             {summary?.status === 'open' && (
               <button
                 onClick={() => setShowForm(true)}
-                className="mt-3 text-blue-600 hover:underline"
+                className="mt-3 text-amber-400 hover:text-amber-300"
               >
                 Aggiungi la prima registrazione
               </button>
             )}
           </div>
         ) : (
-          <div className="divide-y">
+          <div className="divide-y divide-dark-700">
             {entries.map((entry) => (
-              <div key={entry.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+              <div key={entry.id} className="p-4 flex items-center justify-between hover:bg-dark-750 transition-colors">
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900">
+                  <div className="font-medium text-white">
                     {entry.project.name}
                     {entry.project.code && (
-                      <span className="ml-2 text-sm text-gray-500">({entry.project.code})</span>
+                      <span className="ml-2 text-sm text-gray-400">({entry.project.code})</span>
                     )}
                   </div>
                   {entry.notes && (
-                    <p className="text-sm text-gray-500 mt-1">{entry.notes}</p>
+                    <p className="text-sm text-gray-400 mt-1">{entry.notes}</p>
                   )}
                 </div>
                 <div className="flex items-center space-x-4">
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-white">
                     {formatMinutes(entry.durationMinutes)}
                   </span>
                   {summary?.status === 'open' && (
                     <div className="flex items-center space-x-1">
                       <button
                         onClick={() => handleEdit(entry)}
-                        className="p-1.5 text-gray-400 hover:text-blue-600 rounded"
+                        className="p-1.5 text-gray-400 hover:text-blue-400 rounded transition-colors"
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(entry.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-600 rounded"
+                        className="p-1.5 text-gray-400 hover:text-red-400 rounded transition-colors"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -414,13 +419,13 @@ export default function Dashboard() {
 
       {/* Close day modal */}
       {showCloseModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Chiudi giornata</h3>
-            <p className="text-gray-600 mb-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-white mb-2">Chiudi giornata</h3>
+            <p className="text-gray-300 mb-4">
               Stai per chiudere la giornata del {format(new Date(selectedDate), 'dd/MM/yyyy')}.
               {summary && !summary.isComplete && (
-                <span className="block mt-2 text-yellow-600 flex items-center">
+                <span className="block mt-2 text-yellow-400 flex items-center">
                   <AlertCircle className="h-4 w-4 mr-1" />
                   Attenzione: non hai raggiunto il target giornaliero.
                 </span>
@@ -429,13 +434,13 @@ export default function Dashboard() {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowCloseModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 transition-colors"
               >
                 Annulla
               </button>
               <button
                 onClick={handleCloseDay}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 transition-colors"
               >
                 Conferma
               </button>

@@ -39,6 +39,8 @@ export const authApi = {
     api.post('/auth/login', { email, password }),
   me: () => api.get('/auth/me'),
   logout: () => api.post('/auth/logout'),
+  updateProfile: (data: { name?: string; password?: string; currentPassword?: string }) =>
+    api.put('/auth/profile', data),
 };
 
 // Time Entries
