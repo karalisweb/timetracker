@@ -47,7 +47,7 @@ export default function Compliance() {
   const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
   const [userDetail, setUserDetail] = useState<UserWeekDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
-  const [detailWeekStart, setDetailWeekStart] = useState<string | null>(null);
+  const [_detailWeekStart, setDetailWeekStart] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
