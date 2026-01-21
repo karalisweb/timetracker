@@ -343,7 +343,7 @@ export default function ProjectsPage() {
                       <div className="ml-3 flex-1">
                         <div className="font-medium text-white flex items-center gap-2">
                           {user.name}
-                          {user.role === 'admin' && (
+                          {user.roles?.includes('admin') && (
                             <span className="text-xs bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded">
                               Admin
                             </span>

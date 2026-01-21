@@ -5,7 +5,6 @@ import { ChecklistTemplate, User } from '../../types';
 import {
   ArrowLeft,
   Sparkles,
-  Send,
   AlertCircle,
   Check,
   X,
@@ -52,7 +51,7 @@ export default function OrchProjectCreateAIPage() {
 
   // Data
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [_users, setUsers] = useState<User[]>([]);
   const [aiEnabled, setAiEnabled] = useState(false);
 
   // State

@@ -101,11 +101,11 @@ export default function SettingsPage() {
             <h2 className="text-lg font-semibold text-white">{user?.name}</h2>
             <p className="text-gray-400">{user?.email}</p>
             <span className={`inline-flex mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              user?.role === 'admin'
+              user?.roles?.includes('admin')
                 ? 'bg-purple-500/20 text-purple-400'
                 : 'bg-blue-500/20 text-blue-400'
             }`}>
-              {user?.role === 'admin' ? 'Amministratore' : 'Collaboratore'}
+              {user?.roles?.includes('admin') ? 'Amministratore' : 'Collaboratore'}
             </span>
           </div>
         </div>
