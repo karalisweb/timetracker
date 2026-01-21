@@ -97,6 +97,14 @@ export class AdminController {
     return this.adminService.getComplianceDashboard();
   }
 
+  @Get('users/:id/week')
+  async getUserWeekDetail(
+    @Param('id') userId: string,
+    @Query('weekStart') weekStart?: string,
+  ) {
+    return this.adminService.getUserWeekDetail(userId, weekStart);
+  }
+
   // === EXPORT ===
   @Get('export')
   async exportCsv(

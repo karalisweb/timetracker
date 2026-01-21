@@ -93,6 +93,121 @@ export class AdminService {
     };
   }
 
+  async getUserWeekDetail(userId: string, weekStartStr?: string) {
+    const weekStart = weekStartStr
+      ? new Date(weekStartStr)
+      : this.getWeekStart(new Date());
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = this.getWeekEnd(weekStart);
+
+    // Info utente
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        dailyTargetMinutes: true,
+        workingDays: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error('Utente non trovato');
+    }
+
+    // Time entries della settimana
+    const entries = await this.prisma.timeEntry.findMany({
+      where: {
+        userId,
+        date: {
+          gte: weekStart,
+          lte: weekEnd,
+        },
+      },
+      include: {
+        project: {
+          select: { id: true, name: true, code: true },
+        },
+      },
+      orderBy: [{ date: 'asc' }, { createdAt: 'asc' }],
+    });
+
+    // Day status della settimana
+    const dayStatuses = await this.prisma.dayStatus.findMany({
+      where: {
+        userId,
+        date: {
+          gte: weekStart,
+          lte: weekEnd,
+        },
+      },
+    });
+
+    // Costruisci i giorni della settimana
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(weekStart);
+      date.setDate(date.getDate() + i);
+      const dateStr = date.toISOString().split('T')[0];
+
+      const dayEntries = entries.filter(
+        (e) => e.date.toISOString().split('T')[0] === dateStr,
+      );
+      const dayStatus = dayStatuses.find(
+        (s) => s.date.toISOString().split('T')[0] === dateStr,
+      );
+
+      const totalMinutes = dayEntries.reduce(
+        (sum, e) => sum + e.durationMinutes,
+        0,
+      );
+
+      days.push({
+        date: dateStr,
+        dayOfWeek: date.getDay() === 0 ? 7 : date.getDay(),
+        totalMinutes,
+        targetMinutes: user.dailyTargetMinutes,
+        status: dayStatus?.status || 'open',
+        entries: dayEntries.map((e) => ({
+          id: e.id,
+          projectId: e.projectId,
+          projectName: e.project.name,
+          projectCode: e.project.code,
+          durationMinutes: e.durationMinutes,
+          notes: e.notes,
+          createdAt: e.createdAt,
+        })),
+      });
+    }
+
+    // Settimana inviata?
+    const weekSubmission = await this.prisma.weeklySubmission.findUnique({
+      where: {
+        userId_weekStart: {
+          userId,
+          weekStart,
+        },
+      },
+    });
+
+    return {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        dailyTargetMinutes: user.dailyTargetMinutes,
+      },
+      weekStart: weekStart.toISOString().split('T')[0],
+      weekEnd: weekEnd.toISOString().split('T')[0],
+      days,
+      totalMinutes: days.reduce((sum, d) => sum + d.totalMinutes, 0),
+      weeklyTargetMinutes: user.dailyTargetMinutes * user.workingDays.length,
+      weekSubmitted: !!weekSubmission,
+      weekSubmittedAt: weekSubmission?.submittedAt || null,
+    };
+  }
+
   async exportCsv(from: string, to: string) {
     const fromDate = new Date(from);
     fromDate.setHours(0, 0, 0, 0);

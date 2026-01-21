@@ -99,6 +99,8 @@ export const adminApi = {
 
   // Compliance
   getCompliance: () => api.get('/admin/compliance'),
+  getUserWeekDetail: (userId: string, weekStart?: string) =>
+    api.get(`/admin/users/${userId}/week`, { params: { weekStart } }),
 
   // Export
   exportCsv: (from: string, to: string) =>
