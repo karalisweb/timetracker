@@ -17,8 +17,9 @@ export class UpdateUserDto {
   name?: string;
 
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsArray()
+  @IsEnum(UserRole, { each: true })
+  roles?: UserRole[];
 
   @IsOptional()
   @IsArray()
@@ -44,4 +45,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(ReminderChannelPreference)
   reminderChannel?: ReminderChannelPreference;
+
+  @IsOptional()
+  @IsString()
+  asanaUserId?: string;
 }
