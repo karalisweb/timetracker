@@ -1,10 +1,11 @@
-import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { ReminderJobService } from './reminder-job.service';
 import { SlackService } from './slack.service';
 import { EmailService } from './email.service';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('admin/reminders')
 @UseGuards(JwtAuthGuard, AdminGuard)
@@ -14,6 +15,7 @@ export class ReminderController {
     private readonly slackService: SlackService,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Get('status')
@@ -76,6 +78,49 @@ export class ReminderController {
     return {
       success: true,
       message: 'Email configurato correttamente. Usa trigger/hard per inviare reminder.'
+    };
+  }
+
+  @Post('test/slack/send')
+  async testSlackSend(@Body() body: { userId?: string; slackUserId?: string }) {
+    if (!this.slackService.isEnabled()) {
+      return { success: false, error: 'Slack non configurato' };
+    }
+
+    let slackId = body.slackUserId;
+    let userName = 'Test User';
+
+    // Se viene passato userId, cerca l'utente nel DB
+    if (body.userId) {
+      const user = await this.prisma.user.findUnique({
+        where: { id: body.userId },
+        select: { slackUserId: true, name: true },
+      });
+
+      if (!user) {
+        return { success: false, error: 'Utente non trovato' };
+      }
+
+      if (!user.slackUserId) {
+        return { success: false, error: 'Utente non ha Slack ID configurato' };
+      }
+
+      slackId = user.slackUserId;
+      userName = user.name;
+    }
+
+    if (!slackId) {
+      return { success: false, error: 'slackUserId o userId richiesto' };
+    }
+
+    const message = `🔔 *Test Time Report*\n\nCiao ${userName}! Questo è un messaggio di test dal sistema Time Report.\n\n✅ La connessione Slack funziona correttamente!`;
+
+    const sent = await this.slackService.sendDirectMessage(slackId, message);
+
+    return {
+      success: sent,
+      message: sent ? 'Messaggio di test inviato!' : 'Errore invio messaggio',
+      slackUserId: slackId,
     };
   }
 }
