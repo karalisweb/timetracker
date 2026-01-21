@@ -19,11 +19,20 @@ const REMINDER_CHANNELS = [
   { value: 'email_only', label: 'Solo Email' },
 ];
 
+const AVAILABLE_ROLES = [
+  { value: 'admin', label: 'Admin', color: 'purple' },
+  { value: 'pm', label: 'Project Manager', color: 'blue' },
+  { value: 'senior', label: 'Senior', color: 'green' },
+  { value: 'executor', label: 'Executor', color: 'gray' },
+];
+
+type UserRole = 'admin' | 'pm' | 'senior' | 'executor';
+
 interface FormData {
   email: string;
   password: string;
   name: string;
-  role: 'admin' | 'collaborator';
+  roles: UserRole[];
   workingDays: number[];
   workStartTime: string;
   workEndTime: string;
@@ -36,7 +45,7 @@ const emptyForm: FormData = {
   email: '',
   password: '',
   name: '',
-  role: 'collaborator',
+  roles: ['executor'],
   workingDays: [1, 2, 3, 4, 5],
   workStartTime: '09:00',
   workEndTime: '18:00',
@@ -74,7 +83,7 @@ export default function UsersPage() {
       email: user.email,
       password: '',
       name: user.name,
-      role: user.role,
+      roles: user.roles || ['executor'],
       workingDays: user.workingDays,
       workStartTime: user.workStartTime,
       workEndTime: user.workEndTime,
@@ -84,6 +93,25 @@ export default function UsersPage() {
     });
     setEditingId(user.id);
     setShowModal(true);
+  };
+
+  const toggleRole = (role: UserRole) => {
+    setFormData(prev => ({
+      ...prev,
+      roles: prev.roles.includes(role)
+        ? prev.roles.filter(r => r !== role)
+        : [...prev.roles, role],
+    }));
+  };
+
+  const getRoleColor = (role: string) => {
+    const roleConfig = AVAILABLE_ROLES.find(r => r.value === role);
+    switch (roleConfig?.color) {
+      case 'purple': return 'bg-purple-500/20 text-purple-400';
+      case 'blue': return 'bg-blue-500/20 text-blue-400';
+      case 'green': return 'bg-green-500/20 text-green-400';
+      default: return 'bg-gray-500/20 text-gray-400';
+    }
   };
 
   const handleCreate = () => {
@@ -188,13 +216,13 @@ export default function UsersPage() {
                     {user.email}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.role === 'admin'
-                        ? 'bg-purple-500/20 text-purple-400'
-                        : 'bg-blue-500/20 text-blue-400'
-                    }`}>
-                      {user.role === 'admin' ? 'Admin' : 'Collaboratore'}
-                    </span>
+                    <div className="flex flex-wrap gap-1 justify-center">
+                      {(user.roles || []).map(role => (
+                        <span key={role} className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getRoleColor(role)}`}>
+                          {AVAILABLE_ROLES.find(r => r.value === role)?.label || role}
+                        </span>
+                      ))}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center text-gray-400 text-sm">
                     {user.workStartTime} - {user.workEndTime}
@@ -232,13 +260,18 @@ export default function UsersPage() {
                 <h3 className="font-medium text-white truncate">{user.name}</h3>
                 <p className="text-sm text-gray-400 truncate">{user.email}</p>
               </div>
-              <span className={`ml-2 inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 ${
-                user.role === 'admin'
-                  ? 'bg-purple-500/20 text-purple-400'
-                  : 'bg-blue-500/20 text-blue-400'
-              }`}>
-                {user.role === 'admin' ? 'Admin' : 'Collaboratore'}
-              </span>
+              <div className="ml-2 flex flex-wrap gap-1 shrink-0">
+                {(user.roles || []).slice(0, 2).map(role => (
+                  <span key={role} className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getRoleColor(role)}`}>
+                    {AVAILABLE_ROLES.find(r => r.value === role)?.label || role}
+                  </span>
+                ))}
+                {(user.roles || []).length > 2 && (
+                  <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-dark-600 text-gray-400">
+                    +{user.roles.length - 2}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex items-center justify-between text-sm">
               <div className="text-gray-400">
@@ -316,15 +349,26 @@ export default function UsersPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Ruolo</label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="collaborator">Collaboratore</option>
-                    <option value="admin">Admin</option>
-                  </select>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Ruoli</label>
+                  <div className="flex flex-wrap gap-2">
+                    {AVAILABLE_ROLES.map((role) => (
+                      <button
+                        key={role.value}
+                        type="button"
+                        onClick={() => toggleRole(role.value as UserRole)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          formData.roles.includes(role.value as UserRole)
+                            ? 'bg-amber-500 text-black'
+                            : 'bg-dark-700 text-gray-400 hover:bg-dark-600'
+                        }`}
+                      >
+                        {role.label}
+                      </button>
+                    ))}
+                  </div>
+                  {formData.roles.length === 0 && (
+                    <p className="text-red-400 text-xs mt-1">Seleziona almeno un ruolo</p>
+                  )}
                 </div>
               </div>
 

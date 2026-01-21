@@ -10,6 +10,10 @@ import { DayStatusModule } from './day-status/day-status.module';
 import { WeeklyModule } from './weekly/weekly.module';
 import { AdminModule } from './admin/admin.module';
 import { ReminderModule } from './reminder/reminder.module';
+import { OrchestrationModule } from './orchestration/orchestration.module';
+import { AsanaModule } from './asana/asana.module';
+import { ConfigPanelModule } from './config-panel/config-panel.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -26,6 +30,10 @@ import { ReminderModule } from './reminder/reminder.module';
     WeeklyModule,
     AdminModule,
     ReminderModule,
+    OrchestrationModule,
+    AsanaModule,
+    ConfigPanelModule,
+    AiModule,
   ],
 })
 export class AppModule {}

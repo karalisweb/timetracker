@@ -10,6 +10,11 @@ import SettingsPage from './pages/Settings';
 import Compliance from './pages/admin/Compliance';
 import UsersPage from './pages/admin/Users';
 import ProjectsPage from './pages/admin/Projects';
+import AsanaConfigPage from './pages/admin/AsanaConfig';
+import OrchProjectsPage from './pages/orchestration/OrchProjects';
+import OrchProjectDetailPage from './pages/orchestration/OrchProjectDetail';
+import OrchProjectCreatePage from './pages/orchestration/OrchProjectCreate';
+import OrchProjectCreateAIPage from './pages/orchestration/OrchProjectCreateAI';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -45,6 +50,28 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function OrchestrationRoute({ children }: { children: React.ReactNode }) {
+  const { user, canAccessOrchestration, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!canAccessOrchestration) {
     return <Navigate to="/" replace />;
   }
 
@@ -134,6 +161,48 @@ function AppRoutes() {
             <AdminRoute>
               <ProjectsPage />
             </AdminRoute>
+          }
+        />
+        <Route
+          path="admin/asana"
+          element={
+            <AdminRoute>
+              <AsanaConfigPage />
+            </AdminRoute>
+          }
+        />
+
+        {/* Orchestration routes */}
+        <Route
+          path="orchestration"
+          element={
+            <OrchestrationRoute>
+              <OrchProjectsPage />
+            </OrchestrationRoute>
+          }
+        />
+        <Route
+          path="orchestration/new"
+          element={
+            <OrchestrationRoute>
+              <OrchProjectCreatePage />
+            </OrchestrationRoute>
+          }
+        />
+        <Route
+          path="orchestration/new-ai"
+          element={
+            <OrchestrationRoute>
+              <OrchProjectCreateAIPage />
+            </OrchestrationRoute>
+          }
+        />
+        <Route
+          path="orchestration/:id"
+          element={
+            <OrchestrationRoute>
+              <OrchProjectDetailPage />
+            </OrchestrationRoute>
           }
         />
       </Route>

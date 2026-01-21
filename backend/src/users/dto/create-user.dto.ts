@@ -1,4 +1,12 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsArray, IsInt, IsEnum } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  IsOptional,
+  IsArray,
+  IsInt,
+  IsEnum,
+} from 'class-validator';
 import { UserRole, ReminderChannelPreference } from '@prisma/client';
 
 export class CreateUserDto {
@@ -14,8 +22,9 @@ export class CreateUserDto {
   name: string;
 
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsArray()
+  @IsEnum(UserRole, { each: true })
+  roles?: UserRole[];
 
   @IsOptional()
   @IsArray()
@@ -41,4 +50,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(ReminderChannelPreference)
   reminderChannel?: ReminderChannelPreference;
+
+  @IsOptional()
+  @IsString()
+  asanaUserId?: string;
 }

@@ -10,14 +10,22 @@ export class AdminService {
     const weekStart = this.getWeekStart(today);
     const weekEnd = this.getWeekEnd(weekStart);
 
+    // Mostra tutti gli utenti che devono fare time report (tutti tranne admin puri)
     const users = await this.prisma.user.findMany({
-      where: { role: 'collaborator' },
+      where: {
+        OR: [
+          { roles: { has: 'executor' } },
+          { roles: { has: 'pm' } },
+          { roles: { has: 'senior' } },
+        ],
+      },
       select: {
         id: true,
         name: true,
         email: true,
         dailyTargetMinutes: true,
         workingDays: true,
+        roles: true,
       },
       orderBy: { name: 'asc' },
     });

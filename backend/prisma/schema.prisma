@@ -9,7 +9,9 @@ datasource db {
 
 enum UserRole {
   admin
-  collaborator
+  pm
+  senior
+  executor
 }
 
 enum DayStatusType {
@@ -36,11 +38,11 @@ enum ReminderChannelPreference {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  passwordHash  String   @map("password_hash")
+  id            String     @id @default(uuid())
+  email         String     @unique
+  passwordHash  String     @map("password_hash")
   name          String
-  role          UserRole @default(collaborator)
+  roles         UserRole[] @default([executor])
 
   // Profilo orario
   workingDays        Int[]    @default([1, 2, 3, 4, 5]) @map("working_days")
@@ -52,16 +54,24 @@ model User {
   slackUserId     String?                   @map("slack_user_id")
   reminderChannel ReminderChannelPreference @default(slack_only) @map("reminder_channel")
 
+  // Asana mapping
+  asanaUserId String? @unique @map("asana_user_id")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  // Relazioni
-  projectAssignments ProjectAssignment[]
-  timeEntries        TimeEntry[]
-  dayStatuses        DayStatus[]
-  weeklySubmissions  WeeklySubmission[]
-  reminderLogs       ReminderLog[]
+  // Relazioni Time & Cost
+  projectAssignments  ProjectAssignment[]
+  timeEntries         TimeEntry[]
+  dayStatuses         DayStatus[]
+  weeklySubmissions   WeeklySubmission[]
+  reminderLogs        ReminderLog[]
   passwordResetTokens PasswordResetToken[]
+
+  // Relazioni Orchestration
+  executorInstances   ChecklistInstance[] @relation("ExecutorRelation")
+  ownerInstances      ChecklistInstance[] @relation("OwnerRelation")
+  createdOrchProjects OrchProject[]       @relation("CreatedByRelation")
 
   @@map("users")
 }
@@ -152,14 +162,215 @@ model ReminderLog {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  token     String   @unique
-  expiresAt DateTime @map("expires_at")
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  token     String    @unique
+  expiresAt DateTime  @map("expires_at")
   usedAt    DateTime? @map("used_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("password_reset_tokens")
+}
+
+// ============================================
+// ORCHESTRATION MODULE - Enums
+// ============================================
+
+enum OrchProjectStatus {
+  in_development
+  ready_for_publish
+  published
+  delivered
+}
+
+enum ChecklistCategory {
+  seo
+  technical
+  privacy
+  performance
+  backend
+  other
+}
+
+enum ChecklistInstanceStatus {
+  pending
+  completed
+  awaiting_approval
+}
+
+enum GateName {
+  published
+  delivered
+}
+
+// ============================================
+// ORCHESTRATION MODULE - Models
+// ============================================
+
+model OrchProject {
+  id             String            @id @default(uuid())
+  name           String
+  code           String?           @unique
+  status         OrchProjectStatus @default(in_development)
+  decisions      Json?
+  asanaProjectId String?           @map("asana_project_id")
+
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("CreatedByRelation", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  checklistInstances ChecklistInstance[]
+
+  @@index([status])
+  @@index([createdById])
+  @@map("orch_projects")
+}
+
+model ChecklistTemplate {
+  id                String            @id @default(uuid())
+  name              String
+  category          ChecklistCategory
+  version           Int               @default(1)
+  active            Boolean           @default(true)
+  defaultMinutes    Int?              @map("default_minutes")
+  defaultPriority   String?           @map("default_priority")
+  defaultImportance String?           @map("default_importance")
+  defaultFriction   String?           @map("default_friction")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  items            ChecklistItemTemplate[]
+  instances        ChecklistInstance[]
+  gateRequirements GateRequirement[]
+
+  @@unique([name, version])
+  @@index([category])
+  @@index([active])
+  @@map("checklist_templates")
+}
+
+model ChecklistItemTemplate {
+  id                  String            @id @default(uuid())
+  checklistTemplateId String            @map("checklist_template_id")
+  checklistTemplate   ChecklistTemplate @relation(fields: [checklistTemplateId], references: [id], onDelete: Cascade)
+
+  label       String
+  description String?
+  required    Boolean @default(true)
+  sortOrder   Int     @default(0) @map("sort_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([checklistTemplateId])
+  @@map("checklist_item_templates")
+}
+
+model ChecklistInstance {
+  id                  String                  @id @default(uuid())
+  orchProjectId       String                  @map("orch_project_id")
+  orchProject         OrchProject             @relation(fields: [orchProjectId], references: [id], onDelete: Cascade)
+  checklistTemplateId String                  @map("checklist_template_id")
+  checklistTemplate   ChecklistTemplate       @relation(fields: [checklistTemplateId], references: [id])
+  templateVersion     Int                     @map("template_version")
+  status              ChecklistInstanceStatus @default(pending)
+  completedAt         DateTime?               @map("completed_at")
+
+  executorUserId String? @map("executor_user_id")
+  executor       User?   @relation("ExecutorRelation", fields: [executorUserId], references: [id])
+
+  ownerUserId String? @map("owner_user_id")
+  owner       User?   @relation("OwnerRelation", fields: [ownerUserId], references: [id])
+
+  dueDate     DateTime? @map("due_date")
+  asanaTaskId String?   @unique @map("asana_task_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  executionTasks ExecutionTask[]
+
+  @@index([orchProjectId])
+  @@index([checklistTemplateId])
+  @@index([status])
+  @@index([executorUserId])
+  @@map("checklist_instances")
+}
+
+model ExecutionTask {
+  id                  String            @id @default(uuid())
+  checklistInstanceId String            @map("checklist_instance_id")
+  checklistInstance   ChecklistInstance @relation(fields: [checklistInstanceId], references: [id], onDelete: Cascade)
+
+  asanaTaskId         String @unique @map("asana_task_id")
+  asanaProjectId      String @map("asana_project_id")
+  asanaPayloadSnapshot Json  @map("asana_payload_snapshot")
+
+  lastSyncAt DateTime @default(now()) @map("last_sync_at")
+  syncStatus String   @default("synced") @map("sync_status")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([checklistInstanceId])
+  @@index([asanaTaskId])
+  @@map("execution_tasks")
+}
+
+model Gate {
+  id          String   @id @default(uuid())
+  name        GateName @unique
+  displayName String   @map("display_name")
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+
+  requirements GateRequirement[]
+
+  @@index([sortOrder])
+  @@map("gates")
+}
+
+model GateRequirement {
+  id                  String            @id @default(uuid())
+  gateId              String            @map("gate_id")
+  gate                Gate              @relation(fields: [gateId], references: [id], onDelete: Cascade)
+  checklistTemplateId String            @map("checklist_template_id")
+  checklistTemplate   ChecklistTemplate @relation(fields: [checklistTemplateId], references: [id])
+  requiredIfAssigned  Boolean           @default(false) @map("required_if_assigned")
+
+  @@unique([gateId, checklistTemplateId])
+  @@index([gateId])
+  @@map("gate_requirements")
+}
+
+model AsanaWebhookEvent {
+  id           String    @id @default(uuid())
+  asanaEventId String    @unique @map("asana_event_id")
+  eventType    String    @map("event_type")
+  resourceGid  String    @map("resource_gid")
+  payload      Json
+  processedAt  DateTime? @map("processed_at")
+  status       String    @default("pending")
+  errorMessage String?   @map("error_message")
+  retryCount   Int       @default(0) @map("retry_count")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([asanaEventId])
+  @@index([status])
+  @@index([resourceGid])
+  @@map("asana_webhook_events")
+}
+
+model AppConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  encrypted Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_config")
 }

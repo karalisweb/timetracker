@@ -106,4 +106,61 @@ export const adminApi = {
       params: { from, to },
       responseType: 'blob',
     }),
+
+  // Config Asana
+  getAsanaConfig: () => api.get('/admin/config/asana'),
+  updateAsanaConfig: (data: {
+    accessToken?: string;
+    workspaceId?: string;
+    defaultProjectId?: string;
+    fieldProjectId?: string;
+    fieldChecklistId?: string;
+    webhookSecret?: string;
+  }) => api.post('/admin/config/asana', data),
+  testAsanaConnection: () => api.post('/admin/config/asana/test'),
+  getAsanaStatus: () => api.get('/admin/config/asana/status'),
+};
+
+// AI API
+export const aiApi = {
+  getStatus: () => api.get('/ai/status'),
+  testConnection: () => api.get('/ai/test'),
+  generateTasks: (data: { description: string; checklistIds: string[] }) =>
+    api.post('/ai/generate-tasks', data),
+  parseMentions: (text: string) =>
+    api.post('/ai/parse-mentions', { text }),
+};
+
+// Orchestration API
+export const orchestrationApi = {
+  // Projects
+  getProjects: () => api.get('/orchestration/projects'),
+  getProject: (id: string) => api.get(`/orchestration/projects/${id}`),
+  createProject: (data: {
+    name: string;
+    code?: string;
+    decisions?: Record<string, any>;
+    asanaProjectId?: string;
+    checklists: Array<{
+      checklistTemplateId: string;
+      executorUserId?: string;
+      ownerUserId?: string;
+      dueDate?: string;
+    }>;
+  }) => api.post('/orchestration/projects', data),
+  addChecklist: (projectId: string, data: {
+    checklistTemplateId: string;
+    executorUserId?: string;
+    ownerUserId?: string;
+    dueDate?: string;
+  }) => api.post(`/orchestration/projects/${projectId}/checklists`, data),
+  retrySync: (projectId: string) => api.post(`/orchestration/projects/${projectId}/retry-sync`),
+  createAsanaTasks: (projectId: string) => api.post(`/orchestration/projects/${projectId}/create-asana-tasks`),
+  recalculateGates: (projectId: string) => api.post(`/orchestration/projects/${projectId}/recalculate-gates`),
+  getGates: (projectId: string) => api.get(`/orchestration/projects/${projectId}/gates`),
+
+  // Templates
+  getTemplates: (activeOnly?: boolean) => api.get('/orchestration/templates', { params: { activeOnly } }),
+  getTemplate: (id: string) => api.get(`/orchestration/templates/${id}`),
+  getTemplatesByCategory: (category: string) => api.get(`/orchestration/templates/category/${category}`),
 };

@@ -52,8 +52,15 @@ export class ReminderService {
   async checkSoftReminders(): Promise<void> {
     this.logger.log('Esecuzione soft reminders...');
 
+    // Tutti gli utenti che devono fare time report (non solo executor)
     const users = await this.prisma.user.findMany({
-      where: { role: 'collaborator' },
+      where: {
+        OR: [
+          { roles: { has: 'executor' } },
+          { roles: { has: 'pm' } },
+          { roles: { has: 'senior' } },
+        ],
+      },
     });
 
     const today = new Date().toISOString().split('T')[0];
@@ -105,8 +112,15 @@ export class ReminderService {
   async checkHardReminders(graceMinutes: number = 30): Promise<void> {
     this.logger.log('Esecuzione hard reminders...');
 
+    // Tutti gli utenti che devono fare time report (non solo executor)
     const users = await this.prisma.user.findMany({
-      where: { role: 'collaborator' },
+      where: {
+        OR: [
+          { roles: { has: 'executor' } },
+          { roles: { has: 'pm' } },
+          { roles: { has: 'senior' } },
+        ],
+      },
     });
 
     const today = new Date().toISOString().split('T')[0];
@@ -169,8 +183,15 @@ export class ReminderService {
   async checkWeeklyReminders(): Promise<void> {
     this.logger.log('Esecuzione weekly reminders...');
 
+    // Tutti gli utenti che devono fare time report (non solo executor)
     const users = await this.prisma.user.findMany({
-      where: { role: 'collaborator' },
+      where: {
+        OR: [
+          { roles: { has: 'executor' } },
+          { roles: { has: 'pm' } },
+          { roles: { has: 'senior' } },
+        ],
+      },
     });
 
     for (const user of users) {

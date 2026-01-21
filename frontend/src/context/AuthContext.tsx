@@ -10,6 +10,10 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
   isLoading: boolean;
   isAdmin: boolean;
+  isPM: boolean;
+  isSenior: boolean;
+  canAccessOrchestration: boolean;
+  hasRole: (role: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,10 +75,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const isAdmin = user?.role === 'admin';
+  const hasRole = (role: string) => user?.roles?.includes(role as any) ?? false;
+  const isAdmin = hasRole('admin');
+  const isPM = hasRole('pm');
+  const isSenior = hasRole('senior');
+  const canAccessOrchestration = isAdmin || isPM || isSenior;
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, refreshUser, isLoading, isAdmin }}>
+    <AuthContext.Provider value={{
+      user, token, login, logout, refreshUser, isLoading,
+      isAdmin, isPM, isSenior, canAccessOrchestration, hasRole
+    }}>
       {children}
     </AuthContext.Provider>
   );
