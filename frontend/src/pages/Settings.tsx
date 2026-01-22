@@ -182,7 +182,7 @@ export default function SettingsPage() {
           onClick={() => setActiveTab('profile')}
           className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === 'profile'
-              ? 'bg-amber-500 text-black'
+              ? 'bg-gradient-brand text-white shadow-md'
               : 'text-gray-400 hover:text-white'
           }`}
         >
@@ -193,7 +193,7 @@ export default function SettingsPage() {
           onClick={() => setActiveTab('password')}
           className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === 'password'
-              ? 'bg-amber-500 text-black'
+              ? 'bg-gradient-brand text-white shadow-md'
               : 'text-gray-400 hover:text-white'
           }`}
         >
@@ -204,7 +204,7 @@ export default function SettingsPage() {
           onClick={() => setActiveTab('security')}
           className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === 'security'
-              ? 'bg-amber-500 text-black'
+              ? 'bg-gradient-brand text-white shadow-md'
               : 'text-gray-400 hover:text-white'
           }`}
         >
@@ -264,7 +264,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={isProfileSubmitting}
-                className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 disabled:opacity-50 font-medium transition-colors"
+                className="px-4 py-2 bg-gradient-brand text-white rounded-full hover:bg-gradient-brand-hover disabled:opacity-50 font-semibold transition-all shadow-lg"
               >
                 {isProfileSubmitting ? 'Salvataggio...' : 'Salva modifiche'}
               </button>
@@ -336,7 +336,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={isPasswordSubmitting}
-                className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 disabled:opacity-50 font-medium transition-colors"
+                className="px-4 py-2 bg-gradient-brand text-white rounded-full hover:bg-gradient-brand-hover disabled:opacity-50 font-semibold transition-all shadow-lg"
               >
                 {isPasswordSubmitting ? 'Aggiornamento...' : 'Aggiorna password'}
               </button>
@@ -423,7 +423,7 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={isTwoFactorSubmitting || otpCode.length !== 6}
-                  className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 disabled:opacity-50 font-medium transition-colors"
+                  className="px-4 py-2 bg-gradient-brand text-white rounded-full hover:bg-gradient-brand-hover disabled:opacity-50 font-semibold transition-all shadow-lg"
                 >
                   Verifica
                 </button>
@@ -448,7 +448,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  twoFactorEnabled ? 'bg-amber-500' : 'bg-dark-600'
+                  twoFactorEnabled ? 'bg-brand-orange' : 'bg-dark-600'
                 }`}
               >
                 <span
@@ -481,7 +481,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={isTwoFactorSubmitting}
-                className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 disabled:opacity-50 font-medium transition-colors"
+                className="px-4 py-2 bg-gradient-brand text-white rounded-full hover:bg-gradient-brand-hover disabled:opacity-50 font-semibold transition-all shadow-lg"
               >
                 {isTwoFactorSubmitting
                   ? 'Salvataggio...'
@@ -511,6 +511,16 @@ export default function SettingsPage() {
         </div>
         <p className="text-xs text-gray-500 mt-3">
           Per modificare queste impostazioni, contatta un amministratore.
+        </p>
+      </div>
+
+      {/* App version */}
+      <div className="text-center py-4">
+        <p className="text-sm text-gray-500">
+          Time Report v2.2
+        </p>
+        <p className="text-xs text-gray-600 mt-1">
+          Karalisweb
         </p>
       </div>
     </div>
