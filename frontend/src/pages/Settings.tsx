@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';
-import { Settings as SettingsIcon, User, Lock, Check, AlertCircle } from 'lucide-react';
+import { Settings as SettingsIcon, User, Lock, Check, AlertCircle, Shield, Mail } from 'lucide-react';
 
 export default function SettingsPage() {
   const { user, refreshUser } = useAuth();
-  const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'security'>('profile');
 
   // Profile form
   const [name, setName] = useState(user?.name || '');
@@ -20,6 +20,15 @@ export default function SettingsPage() {
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+
+  // 2FA form
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(user?.twoFactorEnabled || false);
+  const [twoFactorEmail, setTwoFactorEmail] = useState(user?.twoFactorEmail || '');
+  const [otpCode, setOtpCode] = useState('');
+  const [twoFactorSuccess, setTwoFactorSuccess] = useState('');
+  const [twoFactorError, setTwoFactorError] = useState('');
+  const [isTwoFactorSubmitting, setIsTwoFactorSubmitting] = useState(false);
+  const [showOtpVerification, setShowOtpVerification] = useState(false);
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +84,62 @@ export default function SettingsPage() {
       setPasswordError(err.response?.data?.message || 'Errore durante l\'aggiornamento');
     } finally {
       setIsPasswordSubmitting(false);
+    }
+  };
+
+  const handleTwoFactorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTwoFactorError('');
+    setTwoFactorSuccess('');
+
+    // Validazione email 2FA se specificata
+    if (twoFactorEnabled && twoFactorEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(twoFactorEmail)) {
+      setTwoFactorError('Inserisci un\'email valida per ricevere i codici OTP');
+      return;
+    }
+
+    setIsTwoFactorSubmitting(true);
+    try {
+      const response = await authApi.updateTwoFactor({
+        twoFactorEnabled,
+        twoFactorEmail: twoFactorEmail || undefined
+      });
+
+      if (twoFactorEnabled) {
+        setTwoFactorSuccess(response.message || 'Codice OTP inviato. Verifica per completare l\'attivazione.');
+        setShowOtpVerification(true);
+      } else {
+        setTwoFactorSuccess('Autenticazione a due fattori disattivata');
+        setShowOtpVerification(false);
+      }
+      refreshUser();
+    } catch (err: any) {
+      setTwoFactorError(err.response?.data?.message || 'Errore durante l\'aggiornamento');
+    } finally {
+      setIsTwoFactorSubmitting(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTwoFactorError('');
+
+    if (!otpCode || otpCode.length !== 6) {
+      setTwoFactorError('Inserisci il codice a 6 cifre');
+      return;
+    }
+
+    setIsTwoFactorSubmitting(true);
+    try {
+      await authApi.verifyTwoFactorSetup(otpCode);
+      setTwoFactorSuccess('Autenticazione a due fattori attivata con successo!');
+      setShowOtpVerification(false);
+      setOtpCode('');
+      refreshUser();
+    } catch (err: any) {
+      setTwoFactorError(err.response?.data?.message || 'Codice non valido');
+    } finally {
+      setIsTwoFactorSubmitting(false);
     }
   };
 
@@ -134,6 +199,17 @@ export default function SettingsPage() {
         >
           <Lock className="h-4 w-4 inline mr-2" />
           Password
+        </button>
+        <button
+          onClick={() => setActiveTab('security')}
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'security'
+              ? 'bg-amber-500 text-black'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          <Shield className="h-4 w-4 inline mr-2" />
+          Sicurezza
         </button>
       </div>
 
@@ -263,6 +339,155 @@ export default function SettingsPage() {
                 className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 disabled:opacity-50 font-medium transition-colors"
               >
                 {isPasswordSubmitting ? 'Aggiornamento...' : 'Aggiorna password'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Security Tab - 2FA */}
+      {activeTab === 'security' && (
+        <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+          <h3 className="text-lg font-semibold text-white mb-2">Autenticazione a due fattori (2FA)</h3>
+          <p className="text-gray-400 text-sm mb-6">
+            Aggiungi un livello di sicurezza extra al tuo account. Quando attiva, ti verrà richiesto
+            un codice OTP via email ogni volta che effettui il login.
+          </p>
+
+          {twoFactorSuccess && (
+            <div className="mb-4 p-3 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center text-green-400">
+              <Check className="h-5 w-5 mr-2 flex-shrink-0" />
+              <span className="text-sm">{twoFactorSuccess}</span>
+            </div>
+          )}
+
+          {twoFactorError && (
+            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center text-red-400">
+              <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+              <span className="text-sm">{twoFactorError}</span>
+            </div>
+          )}
+
+          {/* Status attuale */}
+          <div className="mb-6 p-4 bg-dark-700 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Shield className={`h-5 w-5 mr-3 ${user?.twoFactorEnabled ? 'text-green-400' : 'text-gray-500'}`} />
+                <div>
+                  <p className="text-white font-medium">
+                    {user?.twoFactorEnabled ? '2FA Attiva' : '2FA Non attiva'}
+                  </p>
+                  {user?.twoFactorEnabled && user?.twoFactorEmail && (
+                    <p className="text-sm text-gray-400">
+                      Codici inviati a: {user.twoFactorEmail}
+                    </p>
+                  )}
+                  {user?.twoFactorEnabled && !user?.twoFactorEmail && (
+                    <p className="text-sm text-gray-400">
+                      Codici inviati a: {user?.email}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                user?.twoFactorEnabled
+                  ? 'bg-green-500/20 text-green-400'
+                  : 'bg-gray-500/20 text-gray-400'
+              }`}>
+                {user?.twoFactorEnabled ? 'Attiva' : 'Disattiva'}
+              </span>
+            </div>
+          </div>
+
+          {/* Form OTP verification se richiesto */}
+          {showOtpVerification && (
+            <form onSubmit={handleVerifyOtp} className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+              <div className="flex items-start mb-4">
+                <Mail className="h-5 w-5 text-amber-400 mr-3 mt-0.5" />
+                <div>
+                  <p className="text-amber-400 font-medium">Verifica il tuo codice OTP</p>
+                  <p className="text-sm text-gray-400">
+                    Abbiamo inviato un codice a 6 cifre alla tua email. Inseriscilo per confermare l'attivazione.
+                  </p>
+                </div>
+              </div>
+              <div className="flex space-x-3">
+                <input
+                  type="text"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  maxLength={6}
+                  className="flex-1 px-4 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg text-center text-xl tracking-widest font-mono focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                />
+                <button
+                  type="submit"
+                  disabled={isTwoFactorSubmitting || otpCode.length !== 6}
+                  className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 disabled:opacity-50 font-medium transition-colors"
+                >
+                  Verifica
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Form configurazione 2FA */}
+          <form onSubmit={handleTwoFactorSubmit} className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-dark-700 rounded-lg">
+              <div>
+                <label className="text-white font-medium">
+                  {twoFactorEnabled ? 'Disattiva 2FA' : 'Attiva 2FA'}
+                </label>
+                <p className="text-sm text-gray-400">
+                  {twoFactorEnabled
+                    ? 'Rimuovi il secondo fattore di autenticazione'
+                    : 'Proteggi il tuo account con un codice OTP via email'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  twoFactorEnabled ? 'bg-amber-500' : 'bg-dark-600'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    twoFactorEnabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {twoFactorEnabled && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Email per codici OTP (opzionale)
+                </label>
+                <input
+                  type="email"
+                  value={twoFactorEmail}
+                  onChange={(e) => setTwoFactorEmail(e.target.value)}
+                  placeholder={user?.email}
+                  className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Lascia vuoto per usare la tua email principale ({user?.email})
+                </p>
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-dark-700">
+              <button
+                type="submit"
+                disabled={isTwoFactorSubmitting}
+                className="px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 disabled:opacity-50 font-medium transition-colors"
+              >
+                {isTwoFactorSubmitting
+                  ? 'Salvataggio...'
+                  : twoFactorEnabled
+                    ? 'Attiva 2FA'
+                    : 'Disattiva 2FA'}
               </button>
             </div>
           </form>

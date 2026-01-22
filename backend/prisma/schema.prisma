@@ -57,6 +57,10 @@ model User {
   // Asana mapping
   asanaUserId String? @unique @map("asana_user_id")
 
+  // Two-Factor Authentication (2FA)
+  twoFactorEnabled Boolean @default(false) @map("two_factor_enabled")
+  twoFactorEmail   String? @map("two_factor_email") // Email per OTP, se diversa da quella principale
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

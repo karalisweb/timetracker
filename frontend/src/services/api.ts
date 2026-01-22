@@ -36,7 +36,9 @@ export default api;
 // Auth
 export const authApi = {
   login: (email: string, password: string) =>
-    api.post('/auth/login', { email, password }),
+    api.post('/auth/login', { email, password }).then(res => res.data),
+  verifyLoginOtp: (email: string, code: string, tempToken: string) =>
+    api.post('/auth/verify-login-otp', { email, code, tempToken }).then(res => res.data),
   me: () => api.get('/auth/me'),
   logout: () => api.post('/auth/logout'),
   updateProfile: (data: { name?: string; password?: string; currentPassword?: string }) =>
@@ -47,6 +49,11 @@ export const authApi = {
     api.post('/auth/reset-password', { token, password }),
   validateResetToken: (token: string) =>
     api.get('/auth/validate-reset-token', { params: { token } }),
+  // Two-Factor Authentication
+  updateTwoFactor: (data: { twoFactorEnabled: boolean; twoFactorEmail?: string }) =>
+    api.put('/auth/two-factor', data).then(res => res.data),
+  verifyTwoFactorSetup: (code: string) =>
+    api.post('/auth/verify-two-factor-setup', { code }).then(res => res.data),
 };
 
 // Time Entries

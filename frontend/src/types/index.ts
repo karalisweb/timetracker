@@ -12,6 +12,9 @@ export interface User {
   slackUserId?: string;
   asanaUserId?: string;
   reminderChannel: 'slack_only' | 'slack_email' | 'email_only';
+  // Two-Factor Authentication
+  twoFactorEnabled: boolean;
+  twoFactorEmail?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -105,8 +108,17 @@ export interface ComplianceDashboard {
 }
 
 export interface AuthResponse {
-  user: User;
-  accessToken: string;
+  requiresTwoFactor?: boolean;
+  tempToken?: string;
+  otpEmail?: string;
+  message?: string;
+  user?: User;
+  accessToken?: string;
+}
+
+export interface TwoFactorSettings {
+  twoFactorEnabled: boolean;
+  twoFactorEmail?: string;
 }
 
 // Orchestration Types
