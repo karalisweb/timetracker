@@ -175,6 +175,23 @@ model PasswordResetToken {
 }
 
 // ============================================
+// OTP (One-Time Password) per 2FA via Email
+// ============================================
+
+model OtpToken {
+  id        String    @id @default(uuid())
+  email     String
+  code      String    // Codice OTP a 6 cifre
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([email])
+  @@index([email, code])
+  @@map("otp_tokens")
+}
+
+// ============================================
 // ORCHESTRATION MODULE - Enums
 // ============================================
 

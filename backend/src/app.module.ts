@@ -14,6 +14,7 @@ import { OrchestrationModule } from './orchestration/orchestration.module';
 import { AsanaModule } from './asana/asana.module';
 import { ConfigPanelModule } from './config-panel/config-panel.module';
 import { AiModule } from './ai/ai.module';
+import { OtpModule } from './otp/otp.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AiModule } from './ai/ai.module';
     PrismaModule,
     EmailModule,
     AuthModule,
+    OtpModule,
     UsersModule,
     ProjectsModule,
     TimeEntriesModule,
