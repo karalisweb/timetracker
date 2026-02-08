@@ -1,11 +1,9 @@
-import { Controller, Post, Body, Get, Put, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Patch, Body, Get, Put, Query, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { UpdateTwoFactorDto } from './dto/update-two-factor.dto';
-import { DisableTwoFactorDto } from './dto/disable-two-factor.dto';
 import { VerifyLoginOtpDto } from './dto/verify-login-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
@@ -45,39 +43,13 @@ export class AuthController {
   }
 
   /**
-   * Attiva 2FA - Un click, nessun OTP richiesto
+   * Toggle 2FA - PATCH /auth/2fa { enabled: boolean }
+   * Stile GADS Audit: toggle semplice senza password
    */
   @UseGuards(JwtAuthGuard)
-  @Post('enable-2fa')
-  async enable2FA(@Request() req: any) {
-    return this.authService.enable2FA(req.user.sub);
-  }
-
-  /**
-   * Disattiva 2FA - Richiede conferma password
-   */
-  @UseGuards(JwtAuthGuard)
-  @Post('disable-2fa')
-  async disable2FA(@Request() req: any, @Body() disableDto: DisableTwoFactorDto) {
-    return this.authService.disable2FA(req.user.sub, disableDto);
-  }
-
-  /**
-   * Legacy: Aggiorna impostazioni 2FA (mantiene compatibilità)
-   */
-  @UseGuards(JwtAuthGuard)
-  @Put('two-factor')
-  async updateTwoFactor(@Request() req: any, @Body() updateTwoFactorDto: UpdateTwoFactorDto) {
-    return this.authService.updateTwoFactor(req.user.sub, updateTwoFactorDto);
-  }
-
-  /**
-   * Legacy: Verifica codice OTP per confermare attivazione 2FA
-   */
-  @UseGuards(JwtAuthGuard)
-  @Post('verify-two-factor-setup')
-  async verifyTwoFactorSetup(@Request() req: any, @Body('code') code: string) {
-    return this.authService.verifyTwoFactorSetup(req.user.sub, code);
+  @Patch('2fa')
+  async toggle2FA(@Request() req: any, @Body('enabled') enabled: boolean) {
+    return this.authService.toggle2FA(req.user.sub, enabled);
   }
 
   @Post('forgot-password')

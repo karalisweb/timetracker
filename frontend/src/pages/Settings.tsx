@@ -21,12 +21,10 @@ export default function SettingsPage() {
   const [passwordError, setPasswordError] = useState('');
   const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
 
-  // 2FA - Stile CashFlow: enable one-click, disable con password
+  // 2FA - Toggle semplice come GADS Audit
   const [securityLoading, setSecurityLoading] = useState(false);
   const [securitySuccess, setSecuritySuccess] = useState('');
   const [securityError, setSecurityError] = useState('');
-  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
-  const [disablePassword, setDisablePassword] = useState('');
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,48 +83,18 @@ export default function SettingsPage() {
     }
   };
 
-  const handleEnable2FA = async () => {
+  const handleToggle2FA = async () => {
     setSecurityLoading(true);
     setSecurityError('');
     setSecuritySuccess('');
 
     try {
-      const data = await authApi.enable2FA();
-      if (data.success) {
-        setSecuritySuccess('2FA attivato con successo. Riceverai un codice via email ad ogni accesso.');
-        refreshUser();
-      } else {
-        setSecurityError(data.message || 'Errore durante l\'attivazione');
-      }
+      const newEnabled = !user?.twoFactorEnabled;
+      await authApi.toggle2FA(newEnabled);
+      setSecuritySuccess(newEnabled ? '2FA attivata con successo' : '2FA disattivata con successo');
+      refreshUser();
     } catch (err: any) {
-      setSecurityError(err.response?.data?.message || 'Errore di connessione');
-    } finally {
-      setSecurityLoading(false);
-    }
-  };
-
-  const handleDisable2FA = async () => {
-    if (!disablePassword) {
-      setSecurityError('Inserisci la password per confermare');
-      return;
-    }
-
-    setSecurityLoading(true);
-    setSecurityError('');
-    setSecuritySuccess('');
-
-    try {
-      const data = await authApi.disable2FA(disablePassword);
-      if (data.success) {
-        setSecuritySuccess('2FA disattivato.');
-        setShowDisableConfirm(false);
-        setDisablePassword('');
-        refreshUser();
-      } else {
-        setSecurityError(data.message || 'Errore durante la disattivazione');
-      }
-    } catch (err: any) {
-      setSecurityError(err.response?.data?.message || 'Errore di connessione');
+      setSecurityError(err.response?.data?.message || 'Errore durante l\'aggiornamento della 2FA');
     } finally {
       setSecurityLoading(false);
     }
@@ -334,7 +302,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* Security Tab - 2FA (Stile CashFlow: one-click enable, password-confirm disable) */}
+      {/* Security Tab - 2FA (Toggle semplice come GADS Audit) */}
       {activeTab === 'security' && (
         <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
           <h3 className="text-lg font-semibold text-white mb-2">Autenticazione a due fattori (2FA)</h3>
@@ -377,16 +345,18 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
-              {!user?.twoFactorEnabled && (
-                <button
-                  onClick={handleEnable2FA}
-                  disabled={securityLoading}
-                  className="px-4 py-2 text-sm font-semibold text-white rounded-lg disabled:opacity-50 transition-all"
-                  style={{ background: 'linear-gradient(135deg, #d4a726, #ff8f65)' }}
-                >
-                  {securityLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Attiva'}
-                </button>
-              )}
+              <button
+                onClick={handleToggle2FA}
+                disabled={securityLoading}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg disabled:opacity-50 transition-all ${
+                  user?.twoFactorEnabled
+                    ? 'text-gray-300 border border-dark-600 hover:border-gray-500'
+                    : 'text-white'
+                }`}
+                style={!user?.twoFactorEnabled ? { background: 'linear-gradient(135deg, #d4a726, #ff8f65)' } : {}}
+              >
+                {securityLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : user?.twoFactorEnabled ? 'Disattiva' : 'Attiva'}
+              </button>
             </div>
           </div>
 
@@ -402,71 +372,6 @@ export default function SettingsPage() {
                     Il codice è valido per 10 minuti e può essere usato una sola volta.
                   </p>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Disattiva 2FA - Pulsante per mostrare conferma */}
-          {user?.twoFactorEnabled && !showDisableConfirm && (
-            <div className="mb-4 p-4 bg-dark-700 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white font-medium">Disattiva 2FA</p>
-                  <p className="text-sm text-gray-400">Rimuovi il secondo fattore di autenticazione</p>
-                </div>
-                <button
-                  onClick={() => setShowDisableConfirm(true)}
-                  className="px-4 py-2 text-sm font-medium rounded-lg border transition-colors"
-                  style={{ color: '#a1a1aa', borderColor: '#2a2a35' }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.borderColor = '#ef4444';
-                    e.currentTarget.style.color = '#ef4444';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.borderColor = '#2a2a35';
-                    e.currentTarget.style.color = '#a1a1aa';
-                  }}
-                >
-                  Disattiva
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Conferma disattivazione con password */}
-          {user?.twoFactorEnabled && showDisableConfirm && (
-            <div className="mb-4 p-4 rounded-lg" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-              <p className="font-medium text-red-400 mb-2">Conferma disattivazione</p>
-              <p className="text-sm text-gray-400 mb-4">
-                Inserisci la tua password per confermare la disattivazione del 2FA.
-                Il tuo account sarà meno protetto.
-              </p>
-              <input
-                type="password"
-                value={disablePassword}
-                onChange={(e) => setDisablePassword(e.target.value)}
-                placeholder="Password"
-                className="w-full px-3 py-2 mb-3 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={handleDisable2FA}
-                  disabled={securityLoading}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-all"
-                >
-                  {securityLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Conferma disattivazione'}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDisableConfirm(false);
-                    setDisablePassword('');
-                    setSecurityError('');
-                  }}
-                  className="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-                  style={{ color: '#a1a1aa' }}
-                >
-                  Annulla
-                </button>
               </div>
             </div>
           )}

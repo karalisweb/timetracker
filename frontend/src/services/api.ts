@@ -49,11 +49,9 @@ export const authApi = {
     api.post('/auth/reset-password', { token, password }),
   validateResetToken: (token: string) =>
     api.get('/auth/validate-reset-token', { params: { token } }),
-  // Two-Factor Authentication
-  enable2FA: () =>
-    api.post('/auth/enable-2fa').then(res => res.data),
-  disable2FA: (password: string) =>
-    api.post('/auth/disable-2fa', { password }).then(res => res.data),
+  // Two-Factor Authentication - Toggle semplice come GADS Audit
+  toggle2FA: (enabled: boolean) =>
+    api.patch('/auth/2fa', { enabled }).then(res => res.data),
 };
 
 // Time Entries

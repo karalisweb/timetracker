@@ -10,8 +10,6 @@ import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { UpdateTwoFactorDto } from './dto/update-two-factor.dto';
-import { DisableTwoFactorDto } from './dto/disable-two-factor.dto';
 import { VerifyLoginOtpDto } from './dto/verify-login-otp.dto';
 
 @Injectable()
@@ -209,140 +207,33 @@ export class AuthService {
   }
 
   /**
-   * Aggiorna le impostazioni 2FA dell'utente (legacy - mantiene compatibilità)
+   * Toggle 2FA - Stile GADS Audit
+   * Semplice toggle senza password, con email di conferma
    */
-  async updateTwoFactor(userId: string, updateTwoFactorDto: UpdateTwoFactorDto) {
-    if (updateTwoFactorDto.twoFactorEnabled) {
-      return this.enable2FA(userId);
+  async toggle2FA(userId: string, enabled: boolean) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Utente non trovato');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorEnabled: enabled },
+    });
+
+    // Invia email di conferma
+    if (enabled) {
+      await this.emailService.send2FAEnabledEmail(user.email);
     } else {
-      // Legacy: disattiva senza password (per compatibilità)
-      return this.disable2FADirect(userId);
-    }
-  }
-
-  /**
-   * Attiva 2FA - Un click, senza verifica OTP
-   * Come CashFlow: attivazione immediata + email di conferma
-   */
-  async enable2FA(userId: string) {
-    const user = await this.usersService.findById(userId);
-    if (!user) {
-      throw new UnauthorizedException('Utente non trovato');
+      await this.emailService.send2FADisabledEmail(user.email);
     }
 
-    if (user.twoFactorEnabled) {
-      throw new BadRequestException('2FA è già attivo sul tuo account');
-    }
-
-    // Attiva 2FA immediatamente nel database
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { twoFactorEnabled: true },
-    });
-
-    // Invia email di conferma attivazione
-    await this.emailService.send2FAEnabledEmail(user.email);
-
-    this.logger.log(`2FA attivato per utente ${user.email}`);
+    this.logger.log(`2FA ${enabled ? 'attivato' : 'disattivato'} per utente ${user.email}`);
 
     return {
-      success: true,
-      message: '2FA attivato con successo. Riceverai un codice via email ad ogni accesso.',
+      message: enabled ? '2FA attivata con successo' : '2FA disattivata con successo',
+      twoFactorEnabled: enabled,
     };
-  }
-
-  /**
-   * Disattiva 2FA - Richiede conferma password (come CashFlow)
-   */
-  async disable2FA(userId: string, disableDto: DisableTwoFactorDto) {
-    const user = await this.usersService.findById(userId);
-    if (!user) {
-      throw new UnauthorizedException('Utente non trovato');
-    }
-
-    if (!user.twoFactorEnabled) {
-      throw new BadRequestException('2FA non è attivo sul tuo account');
-    }
-
-    // Verifica password
-    const isPasswordValid = await bcrypt.compare(disableDto.password, user.passwordHash);
-    if (!isPasswordValid) {
-      throw new BadRequestException('Password non valida');
-    }
-
-    // Disattiva 2FA e rimuove email alternativa
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        twoFactorEnabled: false,
-        twoFactorEmail: null,
-      },
-    });
-
-    // Invia email di conferma disattivazione
-    await this.emailService.send2FADisabledEmail(user.email);
-
-    this.logger.log(`2FA disattivato per utente ${user.email}`);
-
-    return {
-      success: true,
-      message: '2FA disattivato.',
-    };
-  }
-
-  /**
-   * Disattiva 2FA senza password (per compatibilità legacy)
-   */
-  private async disable2FADirect(userId: string) {
-    const user = await this.usersService.findById(userId);
-    if (!user) {
-      throw new UnauthorizedException('Utente non trovato');
-    }
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        twoFactorEnabled: false,
-        twoFactorEmail: null,
-      },
-    });
-
-    await this.emailService.send2FADisabledEmail(user.email);
-    this.logger.log(`2FA disattivato per utente ${user.email}`);
-
-    return {
-      success: true,
-      message: 'Autenticazione a due fattori disattivata.',
-    };
-  }
-
-  /**
-   * Verifica il codice OTP per confermare l'attivazione 2FA (legacy)
-   */
-  async verifyTwoFactorSetup(userId: string, code: string) {
-    const user = await this.usersService.findById(userId);
-    if (!user) {
-      throw new UnauthorizedException('Utente non trovato');
-    }
-
-    const otpEmail = (user.twoFactorEmail || user.email).toLowerCase();
-
-    const otpToken = await this.prisma.otpToken.findFirst({
-      where: { email: otpEmail, code },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    if (!otpToken || otpToken.usedAt || otpToken.expiresAt < new Date()) {
-      throw new BadRequestException('Codice OTP non valido o scaduto');
-    }
-
-    // Marca come usato
-    await this.prisma.otpToken.update({
-      where: { id: otpToken.id },
-      data: { usedAt: new Date() },
-    });
-
-    return { verified: true, message: 'Codice verificato correttamente!' };
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
