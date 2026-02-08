@@ -5,6 +5,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateTwoFactorDto } from './dto/update-two-factor.dto';
+import { DisableTwoFactorDto } from './dto/disable-two-factor.dto';
 import { VerifyLoginOtpDto } from './dto/verify-login-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
@@ -44,7 +45,25 @@ export class AuthController {
   }
 
   /**
-   * Aggiorna impostazioni 2FA
+   * Attiva 2FA - Un click, nessun OTP richiesto
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('enable-2fa')
+  async enable2FA(@Request() req: any) {
+    return this.authService.enable2FA(req.user.sub);
+  }
+
+  /**
+   * Disattiva 2FA - Richiede conferma password
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('disable-2fa')
+  async disable2FA(@Request() req: any, @Body() disableDto: DisableTwoFactorDto) {
+    return this.authService.disable2FA(req.user.sub, disableDto);
+  }
+
+  /**
+   * Legacy: Aggiorna impostazioni 2FA (mantiene compatibilità)
    */
   @UseGuards(JwtAuthGuard)
   @Put('two-factor')
@@ -53,7 +72,7 @@ export class AuthController {
   }
 
   /**
-   * Verifica codice OTP per confermare attivazione 2FA
+   * Legacy: Verifica codice OTP per confermare attivazione 2FA
    */
   @UseGuards(JwtAuthGuard)
   @Post('verify-two-factor-setup')

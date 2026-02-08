@@ -50,10 +50,10 @@ export const authApi = {
   validateResetToken: (token: string) =>
     api.get('/auth/validate-reset-token', { params: { token } }),
   // Two-Factor Authentication
-  updateTwoFactor: (data: { twoFactorEnabled: boolean; twoFactorEmail?: string }) =>
-    api.put('/auth/two-factor', data).then(res => res.data),
-  verifyTwoFactorSetup: (code: string) =>
-    api.post('/auth/verify-two-factor-setup', { code }).then(res => res.data),
+  enable2FA: () =>
+    api.post('/auth/enable-2fa').then(res => res.data),
+  disable2FA: (password: string) =>
+    api.post('/auth/disable-2fa', { password }).then(res => res.data),
 };
 
 // Time Entries
