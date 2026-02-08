@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AlertCircle, Shield, ArrowLeft, Mail } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Mail, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -58,158 +58,256 @@ export default function Login() {
   // Form verifica OTP per 2FA
   if (twoFactorState?.required) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4">
-        <div className="max-w-md w-full">
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                <Shield className="h-10 w-10 text-brand-teal" />
-              </div>
-            </div>
-            <h1 className="text-2xl font-bold text-brand-teal">Verifica in due passaggi</h1>
-            <p className="text-gray-400 mt-2">
-              Inserisci il codice inviato a<br />
-              <span className="text-brand-orange font-medium">{twoFactorState.otpEmail}</span>
-            </p>
-          </div>
-
-          <div className="bg-dark-800 rounded-xl border border-dark-700 p-8">
-            {error && (
-              <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center text-red-400">
-                <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
-                <span className="text-sm">{error}</span>
-              </div>
-            )}
-
-            <div className="mb-6 p-4 bg-brand-orange/10 border border-brand-orange/30 rounded-lg">
-              <div className="flex items-start">
-                <Mail className="h-5 w-5 text-brand-orange mr-3 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-gray-300">
-                  Abbiamo inviato un codice a 6 cifre alla tua email.
-                  Il codice è valido per 10 minuti.
-                </p>
-              </div>
-            </div>
-
-            <form onSubmit={handleOtpSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="otp" className="block text-sm font-medium text-gray-300 mb-1">
-                  Codice OTP
-                </label>
-                <input
-                  id="otp"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  required
-                  maxLength={6}
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="w-full px-4 py-3 bg-dark-700 border border-dark-600 text-white rounded-lg text-center text-2xl tracking-[0.5em] font-mono focus:ring-2 focus:ring-brand-orange focus:border-transparent placeholder-dark-500"
-                  placeholder="000000"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || otpCode.length !== 6}
-                className="w-full py-3 px-4 bg-gradient-brand text-white font-semibold rounded-full hover:bg-gradient-brand-hover focus:outline-none focus:ring-2 focus:ring-brand-orange focus:ring-offset-2 focus:ring-offset-dark-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
-              >
-                {isLoading ? 'Verifica in corso...' : 'Verifica e accedi'}
-              </button>
-            </form>
-
-            <div className="mt-6 pt-4 border-t border-dark-700">
-              <button
-                onClick={handleBackToLogin}
-                className="w-full flex items-center justify-center text-gray-400 hover:text-white transition-colors"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Torna al login
-              </button>
+      <div className="min-h-screen flex items-center justify-center px-8" style={{ background: '#0d1521' }}>
+        <div
+          className="w-full max-w-[400px] rounded-xl p-12"
+          style={{
+            background: '#132032',
+            border: '1px solid #2a2a35',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
+          }}
+        >
+          {/* Icona OTP */}
+          <div className="flex items-center justify-center mb-6">
+            <div
+              className="flex h-12 w-12 items-center justify-center rounded-full"
+              style={{ background: 'rgba(212, 167, 38, 0.2)' }}
+            >
+              <Mail className="h-6 w-6" style={{ color: '#d4a726' }} />
             </div>
           </div>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
-            Karalisweb - Time Report v2.2
+          {/* Titolo con gradiente */}
+          <h1
+            className="text-center text-[1.75rem] font-semibold mb-1"
+            style={{
+              background: 'linear-gradient(135deg, #d4a726, #2d7d9a)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            Verifica in due passaggi
+          </h1>
+          <p className="text-center text-[0.9rem] mb-8" style={{ color: '#a1a1aa' }}>
+            Inserisci il codice inviato a{' '}
+            <span className="font-medium" style={{ color: '#d4a726' }}>{twoFactorState.otpEmail}</span>
           </p>
-        </div>
-      </div>
-    );
-  }
 
-  // Form login normale - stile Content Hub
-  return (
-    <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-3xl font-bold text-brand-teal">TR</span>
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-brand-teal">Time Report</h1>
-          <p className="text-gray-400 mt-2">Accedi per registrare le tue ore</p>
-        </div>
-
-        <div className="bg-dark-800 rounded-xl border border-dark-700 p-8">
           {error && (
-            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center text-red-400">
-              <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
-              <span className="text-sm">{error}</span>
-            </div>
+            <div className="text-sm text-center mb-4" style={{ color: '#ef4444' }}>{error}</div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2.5 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-brand-teal focus:border-transparent placeholder-dark-500"
-                placeholder="nome@azienda.it"
-              />
-            </div>
+          <p className="text-sm text-center mb-6" style={{ color: '#a1a1aa' }}>
+            Abbiamo inviato un codice a 6 cifre alla tua email. Il codice è valido per 10 minuti.
+          </p>
 
+          <form onSubmit={handleOtpSubmit} className="space-y-4">
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
-                Password
+              <label htmlFor="otp" className="block text-sm font-medium mb-1" style={{ color: '#a1a1aa' }}>
+                Codice OTP
               </label>
               <input
-                id="password"
-                type="password"
+                id="otp"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2.5 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-brand-teal focus:border-transparent placeholder-dark-500"
-                placeholder="••••••••"
+                maxLength={6}
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="w-full px-4 py-3 rounded-lg text-center text-xl tracking-widest font-mono focus:outline-none"
+                style={{
+                  background: '#1a2d44',
+                  border: '1px solid #2a2a35',
+                  color: '#f5f5f7',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#d4a726';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#2a2a35';
+                  e.target.style.boxShadow = 'none';
+                }}
+                placeholder="000000"
               />
             </div>
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 bg-gradient-brand text-white font-semibold rounded-full hover:bg-gradient-brand-hover focus:outline-none focus:ring-2 focus:ring-brand-orange focus:ring-offset-2 focus:ring-offset-dark-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+              disabled={isLoading || otpCode.length !== 6}
+              className="w-full py-3 px-4 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              style={{
+                background: 'linear-gradient(135deg, #d4a726, #ff8f65)',
+              }}
+              onMouseOver={(e) => {
+                if (!(e.target as HTMLButtonElement).disabled) {
+                  (e.target as HTMLElement).style.transform = 'translateY(-2px)';
+                  (e.target as HTMLElement).style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
+                }
+              }}
+              onMouseOut={(e) => {
+                (e.target as HTMLElement).style.transform = 'translateY(0)';
+                (e.target as HTMLElement).style.boxShadow = 'none';
+              }}
             >
-              {isLoading ? 'Accesso in corso...' : 'Accedi'}
+              {isLoading ? 'Verifica in corso...' : 'Verifica e accedi'}
             </button>
           </form>
 
-          <div className="mt-4 text-center">
-            <Link to="/forgot-password" className="text-sm text-brand-orange hover:text-brand-orange-dark transition-colors">
-              Password dimenticata?
-            </Link>
+          <div className="mt-6 pt-4" style={{ borderTop: '1px solid #2a2a35' }}>
+            <button
+              onClick={handleBackToLogin}
+              className="w-full flex items-center justify-center transition-colors text-sm"
+              style={{ color: '#a1a1aa' }}
+              onMouseOver={(e) => (e.currentTarget.style.color = '#d4a726')}
+              onMouseOut={(e) => (e.currentTarget.style.color = '#a1a1aa')}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Torna al login
+            </button>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        <p className="text-center text-sm text-gray-500 mt-4">
-          Karalisweb - Time Report v2.2
+  // Form login normale - stile Karalisweb Design System (come CashFlow)
+  return (
+    <div className="min-h-screen flex items-center justify-center px-8" style={{ background: '#0d1521' }}>
+      {/* Login Box - Ref: DESIGN-SYSTEM.md sezione 6.1 */}
+      <div
+        className="w-full max-w-[400px] rounded-xl p-12"
+        style={{
+          background: '#132032',
+          border: '1px solid #2a2a35',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
+        }}
+      >
+        {/* Logo negativo Karalisweb (giallo su sfondo scuro) */}
+        <div className="flex justify-center mb-8">
+          <img
+            src="/logo-kw-negativo.png"
+            alt="Karalisweb"
+            className="h-auto"
+            style={{ maxWidth: '180px' }}
+          />
+        </div>
+
+        {/* Titolo app con gradiente oro > teal */}
+        <h1
+          className="text-center text-[1.75rem] font-semibold mb-1"
+          style={{
+            background: 'linear-gradient(135deg, #d4a726, #2d7d9a)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          KW Time Report
+        </h1>
+        <p className="text-center text-[0.9rem] mb-8" style={{ color: '#a1a1aa' }}>
+          Gestione Ore e Presenze
         </p>
+
+        {error && (
+          <div className="text-sm text-center mb-4" style={{ color: '#ef4444' }}>{error}</div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: '#a1a1aa' }}>
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg focus:outline-none transition-all"
+              style={{
+                background: '#1a2d44',
+                border: '1px solid #2a2a35',
+                color: '#f5f5f7',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#d4a726';
+                e.target.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#2a2a35';
+                e.target.style.boxShadow = 'none';
+              }}
+              placeholder="email@esempio.com"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-1" style={{ color: '#a1a1aa' }}>
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg focus:outline-none transition-all"
+              style={{
+                background: '#1a2d44',
+                border: '1px solid #2a2a35',
+                color: '#f5f5f7',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#d4a726';
+                e.target.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#2a2a35';
+                e.target.style.boxShadow = 'none';
+              }}
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3 px-4 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            style={{
+              background: 'linear-gradient(135deg, #d4a726, #ff8f65)',
+            }}
+            onMouseOver={(e) => {
+              if (!(e.target as HTMLButtonElement).disabled) {
+                (e.target as HTMLElement).style.transform = 'translateY(-2px)';
+                (e.target as HTMLElement).style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
+              }
+            }}
+            onMouseOut={(e) => {
+              (e.target as HTMLElement).style.transform = 'translateY(0)';
+              (e.target as HTMLElement).style.boxShadow = 'none';
+            }}
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Accesso in corso...
+              </span>
+            ) : 'Accedi'}
+          </button>
+        </form>
+
+        <div className="text-center mt-4">
+          <Link
+            to="/forgot-password"
+            className="text-sm transition-colors"
+            style={{ color: '#a1a1aa' }}
+            onMouseOver={(e) => (e.currentTarget.style.color = '#d4a726')}
+            onMouseOut={(e) => (e.currentTarget.style.color = '#a1a1aa')}
+          >
+            Password dimenticata?
+          </Link>
+        </div>
       </div>
     </div>
   );
