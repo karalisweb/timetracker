@@ -1,36 +1,77 @@
-# Time Report MVP
+# KW Time Report
 
-Sistema di time tracking compliance-first per Karalisweb.
+Sistema di **time tracking e project orchestration** compliance-first per Karalisweb.
+
+**Versione attuale:** 1.1.0 | **URL:** https://timereport.karalisdemo.it
+
+---
+
+## Funzionalita Principali
+
+### Time Tracking (Collaboratore)
+- Login con autenticazione JWT
+- **2FA via email OTP** (attivabile/disattivabile)
+- Inserimento time entry (data, durata, progetto, note)
+- Vista giornaliera con totale/target/stato
+- Chiusura giornata (completa/incompleta)
+- Vista settimanale con riepilogo
+- Invio settimanale
+
+### Admin
+- Gestione utenti (CRUD + configurazione orari/target/ruoli)
+- Gestione progetti (CRUD + assegnazioni utenti)
+- **Dashboard compliance** con vista dettaglio per utente
+- Export CSV timesheet
+- Gestione reminder e test Slack
+
+### Project Orchestration
+- Creazione progetti con checklist e gate (published/delivered)
+- **Generazione task AI** via OpenAI
+- **Integrazione Asana** con webhook e sincronizzazione task
+- Template checklist riutilizzabili (SEO, technical, privacy, performance, backend)
+- Pannello configurazione Asana
+
+### Reminder Automatici
+- **Soft reminder**: durante orario lavoro se target non raggiunto
+- **Hard reminder**: fine giornata se giornata non chiusa
+- **Weekly reminder**: lunedi se settimana precedente non inviata
+- Canali: Slack, Email o entrambi
+
+### Sicurezza
+- Autenticazione JWT con scadenza configurabile
+- **2FA email OTP** con toggle semplificato
+- Password reset via email
+- Guard basati su ruoli: Admin, PM, Senior, Executor
+
+---
+
+## Stack Tecnologico
+
+| Layer | Tecnologia |
+|-------|-----------|
+| **Backend** | NestJS 11, TypeScript |
+| **ORM** | Prisma 5, PostgreSQL 14+ |
+| **Frontend** | React 19, TypeScript, Vite 7 |
+| **UI** | Tailwind CSS 3.4, Lucide Icons, Karalisweb Design System v2.2 |
+| **Auth** | JWT, bcrypt, 2FA email OTP |
+| **Integrazioni** | Slack API, Nodemailer SMTP, Asana API, OpenAI API |
+| **Deploy** | PM2, Nginx, rsync |
+
+---
 
 ## Requisiti
 
 - Node.js 18+
 - PostgreSQL 14+
-- npm o yarn
+- npm
 
-## Stack Tecnologico
-
-**Backend:**
-- NestJS 11
-- Prisma ORM
-- PostgreSQL
-- JWT Authentication
-- Slack API (per reminder)
-- Nodemailer (per email)
-
-**Frontend:**
-- React 19 + TypeScript
-- Vite
-- Tailwind CSS
-- React Query
-- React Router
+---
 
 ## Setup Locale
 
 ### 1. Database PostgreSQL
 
 ```bash
-# Crea utente e database
 sudo -u postgres psql
 CREATE USER timereport WITH PASSWORD 'TimeReport2026';
 CREATE DATABASE timereport OWNER timereport;
@@ -42,19 +83,11 @@ GRANT ALL PRIVILEGES ON DATABASE timereport TO timereport;
 
 ```bash
 cd backend
-
-# Installa dipendenze
 npm install
-
-# Copia e configura variabili d'ambiente
 cp .env.example .env
 # Modifica .env con i tuoi valori
-
-# Genera client Prisma e applica migrazioni
 npx prisma generate
 npx prisma migrate dev
-
-# Avvia in sviluppo
 npm run start:dev
 ```
 
@@ -62,17 +95,15 @@ npm run start:dev
 
 ```bash
 cd frontend
-
-# Installa dipendenze
 npm install
-
-# Avvia in sviluppo
 npm run dev
 ```
 
-L'app sarà disponibile su:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:3002
+L'app sara disponibile su:
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:3002
+
+---
 
 ## Variabili d'Ambiente
 
@@ -90,137 +121,66 @@ JWT_EXPIRES_IN="7d"
 PORT=3002
 NODE_ENV=development
 
-# Slack (opzionale)
+# Slack
 SLACK_BOT_TOKEN=""
 SLACK_CHANNEL_DEFAULT="#time-report"
 
-# Email SMTP (opzionale)
+# Email (SMTP)
 SMTP_HOST=""
 SMTP_PORT=587
 SMTP_USER=""
 SMTP_PASS=""
-SMTP_FROM="Time Report <noreply@example.com>"
+SMTP_FROM="Time Report <noreply@karalisdemo.it>"
 
 # Reminder
 REMINDER_GRACE_PERIOD_MINUTES=30
+
+# Asana Integration
+ASANA_ACCESS_TOKEN=""
+ASANA_WORKSPACE_ID=""
+ASANA_DEFAULT_PROJECT_ID=""
+ASANA_FIELD_PROJECT_ID=""
+ASANA_FIELD_CHECKLIST_ID=""
+ASANA_WEBHOOK_SECRET=""
+
+# OpenAI Integration (per generazione task AI)
+OPENAI_API_KEY=""
+OPENAI_MODEL="gpt-4o"
 ```
 
-### Frontend
-
-Crea `frontend/.env` se necessario:
+### Frontend (.env)
 
 ```env
 VITE_API_URL=http://localhost:3002/api
 ```
 
-## Deploy Produzione
+---
 
-### 1. Build Backend
+## Deploy
 
-```bash
-cd backend
-npm install
-npm run build
-npm run prisma:deploy
-```
-
-### 2. Build Frontend
+Il deploy e gestito tramite **script automatizzato** (`deploy.sh`). Per la guida completa vedi [DEPLOY.md](DEPLOY.md).
 
 ```bash
-cd frontend
-npm install
-npm run build
-# Output in dist/
+# Deploy standard
+./deploy.sh "descrizione delle modifiche"
+
+# Deploy con bump versione
+./deploy.sh --bump patch "fix bug"
+./deploy.sh --bump minor "nuova feature"
+./deploy.sh --bump major "breaking change"
 ```
 
-### 3. PM2 (raccomandato)
+### Infrastruttura Produzione
 
-```bash
-# Avvia backend
-cd backend
-pm2 start dist/main.js --name time-report
+| Parametro | Valore |
+|-----------|--------|
+| **Host** | vmi2996361.contaboserver.net |
+| **Backend** | PM2 su porta 3004 |
+| **Frontend** | Nginx static files |
+| **URL** | https://timereport.karalisdemo.it |
+| **Database** | PostgreSQL locale |
 
-# Salva configurazione
-pm2 save
-```
-
-### 4. Nginx (esempio)
-
-```nginx
-server {
-    listen 443 ssl;
-    server_name timereport.karalisdemo.it;
-
-    ssl_certificate /etc/letsencrypt/live/timereport.karalisdemo.it/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/timereport.karalisdemo.it/privkey.pem;
-
-    # Frontend (static)
-    location / {
-        root /var/www/time-report;
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Backend API
-    location /api {
-        proxy_pass http://localhost:3002;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-## Primo Utente Admin
-
-Al primo avvio, crea un utente admin via Prisma Studio o SQL:
-
-```bash
-cd backend
-npx prisma studio
-```
-
-Oppure via SQL:
-
-```sql
-INSERT INTO "User" (id, email, password, name, role, "workingDays", "workStartTime", "workEndTime", "dailyTargetMinutes", "reminderChannel", "createdAt", "updatedAt")
-VALUES (
-  gen_random_uuid(),
-  'admin@example.com',
-  '$2b$10$...', -- bcrypt hash della password
-  'Admin',
-  'admin',
-  ARRAY[1,2,3,4,5],
-  '09:00',
-  '18:00',
-  480,
-  'slack',
-  NOW(),
-  NOW()
-);
-```
-
-## Funzionalità
-
-### Collaboratore
-- Login
-- Inserimento time entry (data, durata, progetto, note)
-- Vista giornata con totale/target/stato
-- Chiusura giornata (completa/incompleta)
-- Vista settimana con riepilogo
-- Invio settimanale
-
-### Admin
-- Gestione utenti (CRUD + configurazione orari/target)
-- Gestione progetti (CRUD + assegnazioni)
-- Dashboard compliance
-- Export CSV timesheet
-
-### Reminder Automatici
-- **Soft reminder**: Durante orario lavoro se target non raggiunto
-- **Hard reminder**: Fine giornata se giornata non chiusa
-- **Weekly reminder**: Lunedì se settimana precedente non inviata
+---
 
 ## Struttura Progetto
 
@@ -228,29 +188,115 @@ VALUES (
 Time Tracker/
 ├── backend/
 │   ├── prisma/
-│   │   └── schema.prisma
+│   │   └── schema.prisma          # 22 modelli, 8 enum
 │   ├── src/
-│   │   ├── admin/
-│   │   ├── auth/
-│   │   ├── day-status/
-│   │   ├── projects/
-│   │   ├── reminder/
-│   │   ├── time-entries/
-│   │   ├── users/
-│   │   ├── weekly/
-│   │   └── main.ts
+│   │   ├── admin/                 # Gestione admin (utenti, assegnazioni)
+│   │   ├── ai/                    # Integrazione OpenAI (generazione task)
+│   │   ├── asana/                 # Client Asana, webhook, task sync
+│   │   ├── auth/                  # JWT, login, guard, password reset, 2FA
+│   │   ├── common/                # DTO e guard condivisi
+│   │   ├── config-panel/          # Pannello configurazione Asana
+│   │   ├── day-status/            # Stato giornaliero (aperto/chiuso)
+│   │   ├── email/                 # Servizio invio email SMTP
+│   │   ├── orchestration/         # Progetti, checklist, gate
+│   │   │   ├── checklists/        # Template e istanze checklist
+│   │   │   ├── gates/             # Gate published/delivered
+│   │   │   └── projects/          # CRUD progetti orchestration
+│   │   ├── otp/                   # 2FA: generazione/validazione OTP
+│   │   ├── prisma/                # PrismaService (database)
+│   │   ├── projects/              # CRUD progetti time tracking
+│   │   ├── reminder/              # Reminder automatici (Slack + Email)
+│   │   ├── time-entries/          # CRUD time entry
+│   │   ├── users/                 # Gestione utenti
+│   │   ├── weekly/                # Submission settimanali
+│   │   ├── app.module.ts          # Root module
+│   │   └── main.ts                # Entry point
 │   └── package.json
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
+│   │   │   ├── Header.tsx         # Header mobile
+│   │   │   ├── BottomNav.tsx      # Navigazione bottom mobile
+│   │   │   └── Layout.tsx         # Layout con sidebar/header
 │   │   ├── context/
+│   │   │   └── AuthContext.tsx     # Context autenticazione JWT
+│   │   ├── hooks/                 # Custom hooks (riservato)
 │   │   ├── pages/
+│   │   │   ├── Dashboard.tsx      # Vista giornaliera
+│   │   │   ├── Week.tsx           # Vista settimanale
+│   │   │   ├── Login.tsx          # Login + 2FA OTP
+│   │   │   ├── Settings.tsx       # Impostazioni utente
+│   │   │   ├── ForgotPassword.tsx # Recupero password
+│   │   │   ├── ResetPassword.tsx  # Reset password
+│   │   │   ├── admin/
+│   │   │   │   ├── Compliance.tsx # Dashboard compliance
+│   │   │   │   ├── Projects.tsx   # Gestione progetti
+│   │   │   │   ├── Users.tsx      # Gestione utenti
+│   │   │   │   └── AsanaConfig.tsx# Config integrazione Asana
+│   │   │   └── orchestration/
+│   │   │       ├── OrchProjects.tsx        # Lista progetti
+│   │   │       ├── OrchProjectCreate.tsx   # Crea progetto
+│   │   │       ├── OrchProjectCreateAI.tsx # Crea con AI
+│   │   │       └── OrchProjectDetail.tsx   # Dettaglio progetto
 │   │   ├── services/
+│   │   │   └── api.ts             # Client API centralizzato
 │   │   └── types/
+│   │       └── index.ts           # Definizioni TypeScript
 │   └── package.json
-└── README.md
+├── docs/
+│   └── orchestration/             # 12 file di documentazione tecnica
+├── CHANGELOG.md                   # Storico modifiche
+├── DEPLOY.md                      # Guida deploy e infrastruttura
+├── DESIGN-SYSTEM.md               # Design system Karalisweb v2.2
+├── USER-GUIDE.md                  # Guida utente
+├── SERVER-CONFIG.md               # Configurazione server
+├── deploy.sh                      # Script deploy automatizzato
+└── README.md                      # Questo file
 ```
+
+---
+
+## Ruoli Utente
+
+| Ruolo | Permessi |
+|-------|----------|
+| **Admin** | Gestione completa: utenti, progetti, compliance, configurazioni, orchestration |
+| **PM** | Project Manager: gestione progetti orchestration |
+| **Senior** | Accesso a orchestration e compliance |
+| **Executor** | Time tracking base: inserimento ore, vista giornaliera/settimanale |
+
+---
+
+## Documentazione
+
+| Documento | Descrizione |
+|-----------|------------|
+| [README.md](README.md) | Overview progetto e setup (questo file) |
+| [CHANGELOG.md](CHANGELOG.md) | Storico completo delle modifiche |
+| [DEPLOY.md](DEPLOY.md) | Guida deploy, infrastruttura e troubleshooting |
+| [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) | Design system Karalisweb v2.2 |
+| [USER-GUIDE.md](USER-GUIDE.md) | Guida utente per collaboratori e admin |
+| [docs/orchestration/](docs/orchestration/) | Documentazione tecnica modulo orchestration |
+
+---
+
+## Database
+
+22 modelli Prisma organizzati in 4 aree:
+
+- **Core**: User, Project, ProjectAssignment, TimeEntry, DayStatus, WeeklySubmission
+- **Comunicazione**: ReminderLog, PasswordResetToken
+- **Sicurezza**: OtpToken (2FA)
+- **Orchestration**: OrchProject, ChecklistTemplate, ChecklistItemTemplate, ChecklistInstance, ExecutionTask, Gate, GateRequirement, AsanaWebhookEvent, AppConfig
+
+4 ruoli: `admin`, `pm`, `senior`, `executor`
+
+---
 
 ## Licenza
 
-Proprietario: Karalisweb
+Proprietario: **Karalisweb**
+
+---
+
+*Ultimo aggiornamento: 2026-02-16*

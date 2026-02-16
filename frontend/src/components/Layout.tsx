@@ -82,7 +82,7 @@ export default function Layout() {
               KW Time Report
             </span>
             <span className="text-xs" style={{ color: '#71717a' }}>
-              v2.2.0
+              v1.1.0
             </span>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function Layout() {
               </div>
 
               <div className="pt-4 text-center">
-                <p className="text-xs" style={{ color: '#71717a' }}>KW Time Report v2.2.0</p>
+                <p className="text-xs" style={{ color: '#71717a' }}>KW Time Report v1.1.0</p>
               </div>
             </div>
           </>

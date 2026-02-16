@@ -524,7 +524,7 @@ La sidebar e divisa in **3 zone verticali**:
     <!-- Testo -->
     <div>
         <span class="text-sm font-semibold text-dark-50">KW Time Report</span>
-        <span class="text-xs text-dark-500 block">v1.0.0</span>
+        <span class="text-xs text-dark-500 block">v1.1.0</span>
     </div>
 </div>
 ```

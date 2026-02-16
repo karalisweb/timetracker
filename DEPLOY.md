@@ -1,6 +1,6 @@
 # KW Time Report - Guida Deploy
 
-Versione attuale: **1.0.0**
+Versione attuale: **1.1.0**
 
 ---
 
@@ -38,13 +38,13 @@ Versione attuale: **1.0.0**
 ### Deploy con aggiornamento versione
 
 ```bash
-# Bug fix (1.0.0 > 1.0.1)
+# Bug fix (1.1.0 > 1.0.1)
 ./deploy.sh --bump patch "fix calcolo ore giornaliere"
 
-# Nuova funzionalita (1.0.0 > 1.1.0)
+# Nuova funzionalita (1.1.0 > 1.1.0)
 ./deploy.sh --bump minor "aggiunto report settimanale PDF"
 
-# Breaking change (1.0.0 > 2.0.0)
+# Breaking change (1.1.0 > 2.0.0)
 ./deploy.sh --bump major "redesign dashboard completo"
 ```
 
@@ -157,11 +157,11 @@ La versione va tenuta sincronizzata in:
 
 | File | Campo | Esempio |
 |------|-------|---------|
-| `backend/package.json` | `"version"` | `"1.0.0"` |
-| `frontend/package.json` | `"version"` | `"1.0.0"` |
-| `deploy.sh` | `APP_VERSION` + header | `APP_VERSION="1.0.0"` |
-| `DEPLOY.md` | Intestazione | `Versione attuale: **1.0.0**` |
-| **Sidebar UI** | Sotto il nome app | `v1.0.0` |
+| `backend/package.json` | `"version"` | `"1.1.0"` |
+| `frontend/package.json` | `"version"` | `"1.1.0"` |
+| `deploy.sh` | `APP_VERSION` + header | `APP_VERSION="1.1.0"` |
+| `DEPLOY.md` | Intestazione | `Versione attuale: **1.1.0**` |
+| **Sidebar UI** | Sotto il nome app | `v1.1.0` |
 
 Per aggiornare tutto in automatico usare `--bump`:
 ```bash
@@ -316,4 +316,4 @@ ssh root@185.192.97.108 'certbot --nginx -d timereport.karalisdemo.it'
 
 ---
 
-*Ultimo aggiornamento: 2026-02-08*
+*Ultimo aggiornamento: 2026-02-16*
