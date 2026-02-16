@@ -1,6 +1,6 @@
 # KW Time Report - Guida Deploy
 
-Versione attuale: **1.1.0**
+Versione attuale: **1.1.1**
 
 ---
 
@@ -160,7 +160,7 @@ La versione va tenuta sincronizzata in:
 | `backend/package.json` | `"version"` | `"1.1.0"` |
 | `frontend/package.json` | `"version"` | `"1.1.0"` |
 | `deploy.sh` | `APP_VERSION` + header | `APP_VERSION="1.1.0"` |
-| `DEPLOY.md` | Intestazione | `Versione attuale: **1.1.0**` |
+| `DEPLOY.md` | Intestazione | `Versione attuale: **1.1.1**` |
 | **Sidebar UI** | Sotto il nome app | `v1.1.0` |
 
 Per aggiornare tutto in automatico usare `--bump`:

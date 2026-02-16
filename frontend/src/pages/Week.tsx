@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { weeklyApi } from '../services/api';
 import { WeeklyStatus } from '../types';
-import { Calendar, CheckCircle2, Clock, Send, AlertCircle } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { Calendar, CheckCircle2, Clock, Send, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, parseISO, addDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 export default function Week() {
@@ -10,15 +10,16 @@ export default function Week() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [selectedWeekStart, setSelectedWeekStart] = useState<string | null>(null);
 
   useEffect(() => {
-    loadWeek();
-  }, []);
+    loadWeek(selectedWeekStart || undefined);
+  }, [selectedWeekStart]);
 
-  const loadWeek = async () => {
+  const loadWeek = async (weekStart?: string) => {
     setIsLoading(true);
     try {
-      const { data } = await weeklyApi.getCurrent();
+      const { data } = await weeklyApi.getCurrent(weekStart);
       setWeekData(data);
     } catch (error) {
       console.error('Error loading week:', error);
@@ -30,15 +31,39 @@ export default function Week() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      await weeklyApi.submit();
+      await weeklyApi.submit(weekData?.weekStart);
       setShowSubmitModal(false);
-      loadWeek();
+      loadWeek(selectedWeekStart || undefined);
     } catch (error) {
       console.error('Error submitting week:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handlePrevWeek = () => {
+    if (weekData) {
+      const prev = format(addDays(parseISO(weekData.weekStart), -7), 'yyyy-MM-dd');
+      setSelectedWeekStart(prev);
+    }
+  };
+
+  const handleNextWeek = () => {
+    if (!weekData || isCurrentWeek) return;
+    const next = format(addDays(parseISO(weekData.weekStart), 7), 'yyyy-MM-dd');
+    setSelectedWeekStart(next);
+  };
+
+  const isCurrentWeek = (() => {
+    if (!weekData) return true;
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(today);
+    monday.setDate(diff);
+    const mondayStr = monday.toISOString().split('T')[0];
+    return weekData.weekStart === mondayStr;
+  })();
 
   const formatMinutes = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -96,12 +121,31 @@ export default function Week() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Settimana corrente</h1>
-          <p className="text-gray-400 text-sm">
-            {format(parseISO(weekData.weekStart), 'd MMM', { locale: it })} -{' '}
-            {format(parseISO(weekData.weekEnd), 'd MMM yyyy', { locale: it })}
-          </p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handlePrevWeek}
+            className="p-2 text-gray-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors"
+            title="Settimana precedente"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-white">
+              {isCurrentWeek ? 'Settimana corrente' : 'Settimana passata'}
+            </h1>
+            <p className="text-gray-400 text-sm">
+              {format(parseISO(weekData.weekStart), 'd MMM', { locale: it })} -{' '}
+              {format(parseISO(weekData.weekEnd), 'd MMM yyyy', { locale: it })}
+            </p>
+          </div>
+          <button
+            onClick={handleNextWeek}
+            disabled={isCurrentWeek}
+            className="p-2 text-gray-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Settimana successiva"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
         </div>
         {weekData.submitted ? (
           <span className="flex items-center px-4 py-2 bg-green-500/20 text-green-400 rounded-lg font-medium">

@@ -29,8 +29,10 @@ export class WeeklyService {
     return sunday;
   }
 
-  async getCurrentWeekStatus(userId: string) {
-    const weekStart = this.getWeekStart();
+  async getCurrentWeekStatus(userId: string, weekStartDate?: string) {
+    const weekStart = weekStartDate
+      ? this.getWeekStart(new Date(weekStartDate))
+      : this.getWeekStart();
     const weekEnd = this.getWeekEnd(weekStart);
 
     const weekStartStr = weekStart.toISOString().split('T')[0];
@@ -98,9 +100,17 @@ export class WeeklyService {
     };
   }
 
-  async submitWeek(userId: string) {
-    const weekStart = this.getWeekStart();
+  async submitWeek(userId: string, weekStartDate?: string) {
+    const weekStart = weekStartDate
+      ? this.getWeekStart(new Date(weekStartDate))
+      : this.getWeekStart();
     const weekEnd = this.getWeekEnd(weekStart);
+
+    // Impedisci invio settimane future
+    const currentWeekStart = this.getWeekStart();
+    if (weekStart > currentWeekStart) {
+      throw new BadRequestException('Non puoi inviare una settimana futura');
+    }
 
     // Verifica che non sia già stata inviata
     const existing = await this.prisma.weeklySubmission.findUnique({

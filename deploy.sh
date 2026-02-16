@@ -3,7 +3,7 @@
 # ╔══════════════════════════════════════════════════════════════╗
 # ║                   KW TIME REPORT - DEPLOY                   ║
 # ║                                                              ║
-# ║  Versione:     1.1.0                                        ║
+# ║  Versione:     1.1.1                                        ║
 # ║  Server:       vmi2996361.contaboserver.net                  ║
 # ║  IP:           185.192.97.108                                ║
 # ║  URL:          https://timereport.karalisdemo.it             ║
@@ -25,7 +25,7 @@ set -e
 
 # ─── CONFIGURAZIONE ─────────────────────────────────────────────
 APP_NAME="KW Time Report"
-APP_VERSION="1.1.0"
+APP_VERSION="1.1.1"
 VPS_HOST="root@185.192.97.108"
 VPS_PATH="/root/time-report"
 FRONTEND_PATH="/var/www/time-report"

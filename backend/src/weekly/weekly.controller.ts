@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, UseGuards, Request } from '@nestjs/common';
 import { WeeklyService } from './weekly.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -8,12 +8,18 @@ export class WeeklyController {
   constructor(private weeklyService: WeeklyService) {}
 
   @Get('current')
-  async getCurrentWeek(@Request() req: any) {
-    return this.weeklyService.getCurrentWeekStatus(req.user.sub);
+  async getCurrentWeek(
+    @Request() req: any,
+    @Query('weekStart') weekStart?: string,
+  ) {
+    return this.weeklyService.getCurrentWeekStatus(req.user.sub, weekStart);
   }
 
   @Post('submit')
-  async submitWeek(@Request() req: any) {
-    return this.weeklyService.submitWeek(req.user.sub);
+  async submitWeek(
+    @Request() req: any,
+    @Body('weekStart') weekStart?: string,
+  ) {
+    return this.weeklyService.submitWeek(req.user.sub, weekStart);
   }
 }

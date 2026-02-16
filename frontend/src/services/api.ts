@@ -74,8 +74,10 @@ export const dayStatusApi = {
 
 // Weekly
 export const weeklyApi = {
-  getCurrent: () => api.get('/weekly/current'),
-  submit: () => api.post('/weekly/submit'),
+  getCurrent: (weekStart?: string) =>
+    api.get('/weekly/current', { params: weekStart ? { weekStart } : {} }),
+  submit: (weekStart?: string) =>
+    api.post('/weekly/submit', weekStart ? { weekStart } : {}),
 };
 
 // Projects
