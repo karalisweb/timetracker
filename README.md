@@ -2,7 +2,7 @@
 
 Sistema di **time tracking e project orchestration** compliance-first per Karalisweb.
 
-**Versione attuale:** 1.1.0 | **URL:** https://timereport.karalisdemo.it
+**Versione attuale:** 1.2.0 | **URL:** https://timereport.karalisdemo.it
 
 ---
 

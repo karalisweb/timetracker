@@ -1,7 +1,7 @@
 # KW Time Report - Guida Utente
 
 > Guida completa per collaboratori e amministratori di **KW Time Report**.
-> Versione: **1.1.0**
+> Versione: **1.2.0**
 
 ---
 

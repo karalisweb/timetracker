@@ -6,6 +6,11 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/) e i
 
 ---
 
+## [1.2.0] - 2026-02-23
+
+### Aggiornato
+- feat: migliorie UI/UX - Space Grotesk, componenti riutilizzabili, refactoring Tailwind, animazioni, accessibilita
+
 ## [1.1.0] - 2026-02-16
 
 ### Aggiornato

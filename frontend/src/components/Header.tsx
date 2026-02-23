@@ -29,7 +29,7 @@ export default function Header() {
       {/* Icone a destra */}
       <div className="flex items-center space-x-3">
         {/* Notifiche */}
-        <button className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-dark-700 transition-colors">
+        <button className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-dark-700 transition-colors" aria-label="Notifiche">
           <Bell className="h-5 w-5 text-gray-400" />
           {/* Badge notifiche (opzionale) */}
           {/* <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span> */}
@@ -39,6 +39,7 @@ export default function Header() {
         <Link
           to="/settings"
           className="w-10 h-10 bg-dark-700 rounded-full flex items-center justify-center hover:bg-dark-600 transition-colors border border-dark-600"
+          aria-label="Impostazioni profilo"
         >
           {user?.name ? (
             <span className="text-sm font-medium text-gray-300">{getInitials(user.name)}</span>

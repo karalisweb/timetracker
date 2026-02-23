@@ -54,6 +54,7 @@ export default function BottomNav({ onMenuClick }: BottomNavProps) {
         <button
           onClick={onMenuClick}
           className="flex flex-col items-center justify-center px-3 py-1.5 rounded-lg min-w-[60px] text-gray-500 hover:text-gray-300 transition-colors"
+          aria-label="Apri menu"
         >
           <Menu className="h-5 w-5" />
           <span className="text-xs mt-1 font-medium">Menu</span>

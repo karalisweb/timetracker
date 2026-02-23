@@ -8,18 +8,18 @@ export default {
     extend: {
       colors: {
         dark: {
-          50: '#f8fafc',
+          50: '#f5f5f7',
           100: '#f1f5f9',
           200: '#e2e8f0',
           300: '#cbd5e1',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
+          400: '#a1a1aa',
+          500: '#71717a',
+          600: '#3a3a45',
+          700: '#2a2a35',
+          800: '#1a2d44',
           850: '#18202e',
-          900: '#111827',
-          950: '#0a0f1a',
+          900: '#132032',
+          950: '#0d1521',
         },
         // Brand colors from Content Hub / Karalisweb design system
         brand: {
@@ -37,6 +37,10 @@ export default {
       backgroundImage: {
         'gradient-brand': 'linear-gradient(to right, #fb923c, #f97316)',
         'gradient-brand-hover': 'linear-gradient(to right, #f97316, #ea580c)',
+      },
+      fontFamily: {
+        sans: ['Space Grotesk', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
     },
   },

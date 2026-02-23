@@ -3,7 +3,7 @@
 # ╔══════════════════════════════════════════════════════════════╗
 # ║                   KW TIME REPORT - DEPLOY                   ║
 # ║                                                              ║
-# ║  Versione:     1.1.1                                        ║
+# ║  Versione:     1.2.0                                        ║
 # ║  Server:       vmi2996361.contaboserver.net                  ║
 # ║  IP:           185.192.97.108                                ║
 # ║  URL:          https://timereport.karalisdemo.it             ║
@@ -25,7 +25,7 @@ set -e
 
 # ─── CONFIGURAZIONE ─────────────────────────────────────────────
 APP_NAME="KW Time Report"
-APP_VERSION="1.1.1"
+APP_VERSION="1.2.0"
 VPS_HOST="root@185.192.97.108"
 VPS_PATH="/root/time-report"
 FRONTEND_PATH="/var/www/time-report"
@@ -85,9 +85,32 @@ info "Server: ${VPS_HOST}"
 info "Commit: ${COMMIT_MSG}"
 [ -n "$BUMP_TYPE" ] && info "Version bump: ${BUMP_TYPE}"
 
-# ─── STEP 0: VERSIONING (opzionale) ─────────────────────────────
+# ─── STEP 1: VERIFICA GIT + PULL ──────────────────────────────────
+step "1" "VERIFICA GIT + SINCRONIZZAZIONE"
+
+# Verifica che siamo su un repo git
+if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    error "Non siamo in un repository Git!"
+fi
+
+# Verifica branch
+CURRENT_BRANCH=$(git branch --show-current)
+if [ "$CURRENT_BRANCH" != "$BRANCH" ]; then
+    warn "Branch corrente: $CURRENT_BRANCH (atteso: $BRANCH)"
+fi
+
+success "Repository Git verificato (branch: $CURRENT_BRANCH)"
+
+# Pull ultime modifiche dal remoto (PRIMA di qualsiasi modifica locale)
+info "Sincronizzazione con origin/$BRANCH..."
+git stash --quiet 2>/dev/null || true
+git pull origin "$BRANCH" --rebase || error "Conflitti durante git pull. Risolvili manualmente e riprova."
+git stash pop --quiet 2>/dev/null || true
+success "Sincronizzato con origin/$BRANCH"
+
+# ─── STEP 2: VERSIONING (opzionale) ───────────────────────────────
 if [ -n "$BUMP_TYPE" ]; then
-    step "0" "AGGIORNAMENTO VERSIONE ($BUMP_TYPE)"
+    step "2" "AGGIORNAMENTO VERSIONE ($BUMP_TYPE)"
 
     # Parse versione corrente
     IFS='.' read -r MAJOR MINOR PATCH <<< "$APP_VERSION"
@@ -125,22 +148,42 @@ if [ -n "$BUMP_TYPE" ]; then
         success "DEPLOY.md aggiornato"
     fi
 
+    # Aggiorna Layout.tsx (versione UI sidebar + mobile menu)
+    if [ -f "frontend/src/components/Layout.tsx" ]; then
+        sed -i '' "s/v[0-9]*\.[0-9]*\.[0-9]*/v${NEW_VERSION}/g" frontend/src/components/Layout.tsx
+        success "Layout.tsx aggiornato (versione UI)"
+    fi
+
+    # Aggiorna USER-GUIDE.md
+    if [ -f "USER-GUIDE.md" ]; then
+        sed -i '' "s/Versione: \*\*[0-9]*\.[0-9]*\.[0-9]*\*\*/Versione: \*\*${NEW_VERSION}\*\*/" USER-GUIDE.md
+        success "USER-GUIDE.md aggiornato"
+    fi
+
+    # Aggiorna README.md
+    if [ -f "README.md" ]; then
+        sed -i '' "s/\*\*Versione attuale:\*\* [0-9]*\.[0-9]*\.[0-9]*/\*\*Versione attuale:\*\* ${NEW_VERSION}/" README.md
+        success "README.md aggiornato"
+    fi
+
+    # Aggiorna CHANGELOG.md (inserisce nuova entry automatica)
+    if [ -f "CHANGELOG.md" ]; then
+        TODAY=$(date +%Y-%m-%d)
+        awk -v ver="$NEW_VERSION" -v dt="$TODAY" -v msg="$COMMIT_MSG" '
+        /^---$/ && !done {
+            print; print "";
+            print "## [" ver "] - " dt;
+            print "";
+            print "### Aggiornato";
+            print "- " msg;
+            done=1; next
+        }
+        {print}' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+        success "CHANGELOG.md aggiornato (nuova entry ${NEW_VERSION})"
+    fi
+
     APP_VERSION="$NEW_VERSION"
     success "Versione aggiornata a ${NEW_VERSION}"
-fi
-
-# ─── STEP 1: VERIFICA GIT ───────────────────────────────────────
-step "1" "VERIFICA GIT"
-
-# Verifica che siamo su un repo git
-if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-    error "Non siamo in un repository Git!"
-fi
-
-# Verifica branch
-CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" != "$BRANCH" ]; then
-    warn "Branch corrente: $CURRENT_BRANCH (atteso: $BRANCH)"
 fi
 
 # Verifica modifiche
@@ -152,10 +195,8 @@ if [ -z "$CHANGES" ]; then
     fi
 fi
 
-success "Repository Git verificato (branch: $CURRENT_BRANCH)"
-
-# ─── STEP 2: COMMIT ─────────────────────────────────────────────
-step "2" "COMMIT"
+# ─── STEP 3: COMMIT ─────────────────────────────────────────────
+step "3" "COMMIT"
 
 if [ -n "$CHANGES" ] || [ -n "$BUMP_TYPE" ]; then
     git add .
@@ -165,22 +206,22 @@ else
     info "Nessun commit necessario"
 fi
 
-# ─── STEP 3: PUSH ───────────────────────────────────────────────
-step "3" "PUSH"
+# ─── STEP 4: PUSH ───────────────────────────────────────────────
+step "4" "PUSH"
 
 git push origin "$BRANCH"
 success "Push completato su origin/$BRANCH"
 
-# ─── STEP 4: BUILD FRONTEND ─────────────────────────────────────
-step "4" "BUILD FRONTEND (React + Vite)"
+# ─── STEP 5: BUILD FRONTEND ─────────────────────────────────────
+step "5" "BUILD FRONTEND (React + Vite)"
 
 cd frontend
 npm run build
 cd ..
 success "Frontend buildato con successo"
 
-# ─── STEP 5: SYNC BACKEND ───────────────────────────────────────
-step "5" "SYNC BACKEND AL SERVER"
+# ─── STEP 6: SYNC BACKEND ───────────────────────────────────────
+step "6" "SYNC BACKEND AL SERVER"
 
 rsync -avz --delete \
     --exclude 'node_modules' \
@@ -191,15 +232,15 @@ rsync -avz --delete \
     backend/ "$VPS_HOST:$VPS_PATH/backend/"
 success "Backend sincronizzato su $VPS_HOST:$VPS_PATH/backend/"
 
-# ─── STEP 6: SYNC FRONTEND ──────────────────────────────────────
-step "6" "SYNC FRONTEND AL SERVER"
+# ─── STEP 7: SYNC FRONTEND ──────────────────────────────────────
+step "7" "SYNC FRONTEND AL SERVER"
 
 rsync -avz --delete \
     frontend/dist/ "$VPS_HOST:$FRONTEND_PATH/"
 success "Frontend sincronizzato su $VPS_HOST:$FRONTEND_PATH/"
 
-# ─── STEP 7: SETUP REMOTO ───────────────────────────────────────
-step "7" "SETUP REMOTO (install + build + migrate)"
+# ─── STEP 8: SETUP REMOTO ───────────────────────────────────────
+step "8" "SETUP REMOTO (install + build + migrate)"
 
 ssh "$VPS_HOST" << ENDSSH
 set -e
@@ -222,8 +263,8 @@ ENDSSH
 
 success "Setup remoto completato"
 
-# ─── STEP 8: RESTART PM2 ────────────────────────────────────────
-step "8" "RESTART PM2"
+# ─── STEP 9: RESTART PM2 ────────────────────────────────────────
+step "9" "RESTART PM2"
 
 ssh "$VPS_HOST" << ENDSSH
 cd $VPS_PATH/backend
@@ -255,4 +296,16 @@ info "App:      ${APP_NAME}"
 info "Versione: v${APP_VERSION}"
 info "Commit:   ${COMMIT_MSG}"
 info "URL:      ${PUBLIC_URL}"
+if [ -n "$BUMP_TYPE" ]; then
+    echo ""
+    info "File aggiornati con versione v${APP_VERSION}:"
+    info "  - backend/package.json"
+    info "  - frontend/package.json"
+    info "  - deploy.sh"
+    info "  - DEPLOY.md"
+    info "  - Layout.tsx (UI sidebar + mobile)"
+    info "  - USER-GUIDE.md"
+    info "  - README.md"
+    info "  - CHANGELOG.md (nuova entry)"
+fi
 echo ""
