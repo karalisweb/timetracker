@@ -2,14 +2,14 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTimeEntryDto } from './dto/create-time-entry.dto';
 import { UpdateTimeEntryDto } from './dto/update-time-entry.dto';
+import { parseDateUTC } from '../common/date.utils';
 
 @Injectable()
 export class TimeEntriesService {
   constructor(private prisma: PrismaService) {}
 
   async findByUserAndDate(userId: string, date: string) {
-    const targetDate = new Date(date);
-    targetDate.setHours(0, 0, 0, 0);
+    const targetDate = parseDateUTC(date);
 
     return this.prisma.timeEntry.findMany({
       where: {
@@ -30,8 +30,7 @@ export class TimeEntriesService {
   }
 
   async getTotalMinutesByUserAndDate(userId: string, date: string): Promise<number> {
-    const targetDate = new Date(date);
-    targetDate.setHours(0, 0, 0, 0);
+    const targetDate = parseDateUTC(date);
 
     const result = await this.prisma.timeEntry.aggregate({
       where: {
@@ -61,8 +60,7 @@ export class TimeEntriesService {
       throw new ForbiddenException('Non sei assegnato a questo progetto');
     }
 
-    const entryDate = new Date(createDto.date);
-    entryDate.setHours(0, 0, 0, 0);
+    const entryDate = parseDateUTC(createDto.date);
 
     return this.prisma.timeEntry.create({
       data: {
@@ -115,9 +113,7 @@ export class TimeEntriesService {
 
     const data: any = { ...updateDto };
     if (updateDto.date) {
-      const entryDate = new Date(updateDto.date);
-      entryDate.setHours(0, 0, 0, 0);
-      data.date = entryDate;
+      data.date = parseDateUTC(updateDto.date);
     }
 
     return this.prisma.timeEntry.update({
@@ -154,10 +150,8 @@ export class TimeEntriesService {
   }
 
   async findByUserAndDateRange(userId: string, startDate: string, endDate: string) {
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
+    const start = parseDateUTC(startDate);
+    const end = parseDateUTC(endDate);
 
     return this.prisma.timeEntry.findMany({
       where: {

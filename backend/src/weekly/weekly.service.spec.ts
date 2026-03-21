@@ -1,155 +1,168 @@
-import { WeeklyService } from './weekly.service';
+import { parseDateUTC, formatDateUTC, getWeekStartUTC, getWeekEndUTC, getTodayStr } from '../common/date.utils';
 
-// Accediamo ai metodi privati tramite casting
-type WeeklyServicePrivate = {
-  parseLocalDate(dateStr: string): Date;
-  getWeekStart(date?: Date): Date;
-  getWeekEnd(weekStart: Date): Date;
-  formatDateStr(date: Date): string;
-};
+describe('Date utilities — calcoli date timezone-safe', () => {
 
-describe('WeeklyService — calcoli date', () => {
-  let service: WeeklyServicePrivate;
-
-  beforeEach(() => {
-    // Creiamo un'istanza con dipendenze mock
-    service = new (WeeklyService as any)(null, null, null) as WeeklyServicePrivate;
-  });
-
-  describe('parseLocalDate', () => {
-    it('parsa una data come ora locale, non UTC', () => {
-      const date = service.parseLocalDate('2026-02-16');
-      expect(date.getFullYear()).toBe(2026);
-      expect(date.getMonth()).toBe(1); // febbraio = 1
-      expect(date.getDate()).toBe(16);
+  describe('parseDateUTC', () => {
+    it('parsa una data come UTC midnight', () => {
+      const date = parseDateUTC('2026-02-16');
+      expect(date.getUTCFullYear()).toBe(2026);
+      expect(date.getUTCMonth()).toBe(1); // febbraio = 1
+      expect(date.getUTCDate()).toBe(16);
+      expect(date.getUTCHours()).toBe(0);
     });
 
     it('non shifta la data a causa del timezone', () => {
-      // Questo era il bug: new Date("2026-02-16") creava UTC midnight
-      // che in CET diventava il giorno prima
-      const date = service.parseLocalDate('2026-03-01');
-      expect(date.getDate()).toBe(1);
-      expect(date.getMonth()).toBe(2); // marzo = 2
+      const date = parseDateUTC('2026-03-01');
+      expect(date.getUTCDate()).toBe(1);
+      expect(date.getUTCMonth()).toBe(2); // marzo = 2
     });
 
     it('gestisce fine febbraio correttamente', () => {
-      const date = service.parseLocalDate('2026-02-28');
-      expect(date.getDate()).toBe(28);
-      expect(date.getMonth()).toBe(1);
+      const date = parseDateUTC('2026-02-28');
+      expect(date.getUTCDate()).toBe(28);
+      expect(date.getUTCMonth()).toBe(1);
+    });
+
+    it('crea sempre UTC midnight (00:00:00.000Z)', () => {
+      const date = parseDateUTC('2026-07-15');
+      expect(date.toISOString()).toBe('2026-07-15T00:00:00.000Z');
     });
   });
 
-  describe('getWeekStart', () => {
-    it('ritorna lunedi per un lunedi', () => {
-      // 2026-03-16 e un lunedi
-      const monday = service.parseLocalDate('2026-03-16');
-      const result = service.getWeekStart(monday);
-      expect(service.formatDateStr(result)).toBe('2026-03-16');
-    });
-
-    it('ritorna lunedi per un mercoledi', () => {
-      // 2026-03-18 e un mercoledi -> lunedi e 2026-03-16
-      const wednesday = service.parseLocalDate('2026-03-18');
-      const result = service.getWeekStart(wednesday);
-      expect(service.formatDateStr(result)).toBe('2026-03-16');
-    });
-
-    it('ritorna lunedi per una domenica', () => {
-      // 2026-03-22 e una domenica -> lunedi e 2026-03-16
-      const sunday = service.parseLocalDate('2026-03-22');
-      const result = service.getWeekStart(sunday);
-      expect(service.formatDateStr(result)).toBe('2026-03-16');
-    });
-
-    it('ritorna lunedi per un sabato', () => {
-      // 2026-03-21 e un sabato -> lunedi e 2026-03-16
-      const saturday = service.parseLocalDate('2026-03-21');
-      const result = service.getWeekStart(saturday);
-      expect(service.formatDateStr(result)).toBe('2026-03-16');
-    });
-
-    it('gestisce il cambio mese feb->mar', () => {
-      // 2026-03-01 e un domenica -> lunedi e 2026-02-23
-      const marchFirst = service.parseLocalDate('2026-03-01');
-      const result = service.getWeekStart(marchFirst);
-      expect(service.formatDateStr(result)).toBe('2026-02-23');
-    });
-
-    it('gestisce il cambio mese gen->feb al contrario', () => {
-      // 2026-02-01 e un domenica -> lunedi e 2026-01-26
-      const febFirst = service.parseLocalDate('2026-02-01');
-      const result = service.getWeekStart(febFirst);
-      expect(service.formatDateStr(result)).toBe('2026-01-26');
-    });
-
-    it('gestisce il cambio anno dic->gen', () => {
-      // 2026-01-01 e un giovedi -> lunedi e 2025-12-29
-      const janFirst = service.parseLocalDate('2026-01-01');
-      const result = service.getWeekStart(janFirst);
-      expect(service.formatDateStr(result)).toBe('2025-12-29');
-    });
-  });
-
-  describe('getWeekEnd', () => {
-    it('ritorna domenica (6 giorni dopo lunedi)', () => {
-      const monday = service.parseLocalDate('2026-03-16');
-      const weekStart = service.getWeekStart(monday);
-      const result = service.getWeekEnd(weekStart);
-      expect(result.getDate()).toBe(22); // domenica 22 marzo
-    });
-
-    it('gestisce fine mese', () => {
-      const monday = service.parseLocalDate('2026-02-23');
-      const weekStart = service.getWeekStart(monday);
-      const result = service.getWeekEnd(weekStart);
-      // 23 feb + 6 = 1 marzo
-      expect(result.getMonth()).toBe(2); // marzo
-      expect(result.getDate()).toBe(1);
-    });
-  });
-
-  describe('formatDateStr', () => {
-    it('formatta correttamente senza usare toISOString', () => {
-      const date = service.parseLocalDate('2026-03-05');
-      expect(service.formatDateStr(date)).toBe('2026-03-05');
+  describe('formatDateUTC', () => {
+    it('formatta correttamente usando UTC', () => {
+      const date = parseDateUTC('2026-03-05');
+      expect(formatDateUTC(date)).toBe('2026-03-05');
     });
 
     it('aggiunge zero-padding a mese e giorno', () => {
-      const date = service.parseLocalDate('2026-01-09');
-      expect(service.formatDateStr(date)).toBe('2026-01-09');
+      const date = parseDateUTC('2026-01-09');
+      expect(formatDateUTC(date)).toBe('2026-01-09');
+    });
+
+    it('non è influenzato dal timezone locale', () => {
+      // Crea una data che potrebbe essere shiftata in timezone locali
+      const date = new Date('2026-03-01T00:00:00.000Z');
+      expect(formatDateUTC(date)).toBe('2026-03-01');
+    });
+
+    it('roundtrip: parseDateUTC → formatDateUTC è identità', () => {
+      const dates = ['2026-01-01', '2026-02-28', '2026-03-01', '2026-12-31'];
+      for (const d of dates) {
+        expect(formatDateUTC(parseDateUTC(d))).toBe(d);
+      }
     });
   });
 
-  describe('coerenza getWeekStart con stringa e parseLocalDate', () => {
-    it('produce lo stesso risultato da stringa e da data locale', () => {
-      // Questo verifica che il bug del timezone sia risolto:
-      // getWeekStart(parseLocalDate("2026-02-16")) deve dare lo stesso
-      // risultato di getWeekStart(new Date(2026, 1, 16))
-      const fromString = service.getWeekStart(service.parseLocalDate('2026-02-16'));
-      const fromDate = service.getWeekStart(new Date(2026, 1, 16));
-      expect(service.formatDateStr(fromString)).toBe(service.formatDateStr(fromDate));
+  describe('getWeekStartUTC', () => {
+    it('ritorna lunedì per un lunedì', () => {
+      const monday = parseDateUTC('2026-03-16');
+      const result = getWeekStartUTC(monday);
+      expect(formatDateUTC(result)).toBe('2026-03-16');
     });
 
+    it('ritorna lunedì per un mercoledì', () => {
+      const wednesday = parseDateUTC('2026-03-18');
+      const result = getWeekStartUTC(wednesday);
+      expect(formatDateUTC(result)).toBe('2026-03-16');
+    });
+
+    it('ritorna lunedì per una domenica', () => {
+      const sunday = parseDateUTC('2026-03-22');
+      const result = getWeekStartUTC(sunday);
+      expect(formatDateUTC(result)).toBe('2026-03-16');
+    });
+
+    it('ritorna lunedì per un sabato', () => {
+      const saturday = parseDateUTC('2026-03-21');
+      const result = getWeekStartUTC(saturday);
+      expect(formatDateUTC(result)).toBe('2026-03-16');
+    });
+
+    it('gestisce il cambio mese feb->mar', () => {
+      const marchFirst = parseDateUTC('2026-03-01');
+      const result = getWeekStartUTC(marchFirst);
+      expect(formatDateUTC(result)).toBe('2026-02-23');
+    });
+
+    it('gestisce il cambio mese gen->feb', () => {
+      const febFirst = parseDateUTC('2026-02-01');
+      const result = getWeekStartUTC(febFirst);
+      expect(formatDateUTC(result)).toBe('2026-01-26');
+    });
+
+    it('gestisce il cambio anno dic->gen', () => {
+      const janFirst = parseDateUTC('2026-01-01');
+      const result = getWeekStartUTC(janFirst);
+      expect(formatDateUTC(result)).toBe('2025-12-29');
+    });
+
+    it('ritorna sempre UTC midnight', () => {
+      const result = getWeekStartUTC(parseDateUTC('2026-03-18'));
+      expect(result.getUTCHours()).toBe(0);
+      expect(result.getUTCMinutes()).toBe(0);
+    });
+  });
+
+  describe('getWeekEndUTC', () => {
+    it('ritorna domenica (6 giorni dopo lunedì)', () => {
+      const weekStart = getWeekStartUTC(parseDateUTC('2026-03-16'));
+      const result = getWeekEndUTC(weekStart);
+      expect(formatDateUTC(result)).toBe('2026-03-22');
+    });
+
+    it('gestisce fine mese', () => {
+      const weekStart = getWeekStartUTC(parseDateUTC('2026-02-23'));
+      const result = getWeekEndUTC(weekStart);
+      expect(formatDateUTC(result)).toBe('2026-03-01');
+    });
+  });
+
+  describe('getTodayStr', () => {
+    it('restituisce una stringa YYYY-MM-DD', () => {
+      const today = getTodayStr();
+      expect(today).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+  });
+
+  describe('coerenza settimane', () => {
     it('tutte le settimane di febbraio 2026 sono raggiungibili', () => {
-      // Navighiamo settimana per settimana da inizio febbraio
       const weeks: string[] = [];
-      let current = service.parseLocalDate('2026-02-01');
-      const endOfFeb = service.parseLocalDate('2026-02-28');
+      let current = parseDateUTC('2026-02-01');
+      const endOfFeb = parseDateUTC('2026-02-28');
 
       while (current <= endOfFeb) {
-        const ws = service.getWeekStart(current);
-        const wsStr = service.formatDateStr(ws);
+        const ws = getWeekStartUTC(current);
+        const wsStr = formatDateUTC(ws);
         if (!weeks.includes(wsStr)) {
           weeks.push(wsStr);
         }
-        // Avanza di 1 giorno
         current = new Date(current.getTime() + 24 * 60 * 60 * 1000);
       }
 
-      // Febbraio 2026 dovrebbe avere 4-5 settimane
       expect(weeks.length).toBeGreaterThanOrEqual(4);
-      // La prima settimana dovrebbe includere il 1 feb
-      // L'ultima dovrebbe coprire il 28 feb
+    });
+
+    it('7 giorni da weekStart coprono lun-dom', () => {
+      const weekStart = getWeekStartUTC(parseDateUTC('2026-03-18'));
+      const days: string[] = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000);
+        days.push(formatDateUTC(d));
+      }
+      expect(days).toEqual([
+        '2026-03-16', '2026-03-17', '2026-03-18', '2026-03-19',
+        '2026-03-20', '2026-03-21', '2026-03-22',
+      ]);
+    });
+
+    it('getUTCDay per ogni giorno della settimana è corretto', () => {
+      const weekStart = getWeekStartUTC(parseDateUTC('2026-03-18'));
+      const expectedDays = [1, 2, 3, 4, 5, 6, 0]; // Lun=1, ..., Dom=0
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000);
+        expect(d.getUTCDay()).toBe(expectedDays[i]);
+      }
     });
   });
 });

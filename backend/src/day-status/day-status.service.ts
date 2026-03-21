@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TimeEntriesService } from '../time-entries/time-entries.service';
 import { DayStatusType } from '@prisma/client';
+import { parseDateUTC, getTodayStr } from '../common/date.utils';
 
 @Injectable()
 export class DayStatusService {
@@ -11,8 +12,7 @@ export class DayStatusService {
   ) {}
 
   async getStatus(userId: string, date: string) {
-    const targetDate = new Date(date);
-    targetDate.setHours(0, 0, 0, 0);
+    const targetDate = parseDateUTC(date);
 
     const status = await this.prisma.dayStatus.findUnique({
       where: {
@@ -27,7 +27,7 @@ export class DayStatusService {
   }
 
   async getTodaySummary(userId: string) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayStr();
 
     const [totalMinutes, dayStatus, user] = await Promise.all([
       this.timeEntriesService.getTotalMinutesByUserAndDate(userId, today),
@@ -48,13 +48,11 @@ export class DayStatusService {
   }
 
   async closeDay(userId: string, date: string) {
-    const targetDate = new Date(date);
-    targetDate.setHours(0, 0, 0, 0);
+    const targetDate = parseDateUTC(date);
 
     // Verifica che non sia una data futura
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (targetDate > today) {
+    const todayDate = parseDateUTC(getTodayStr());
+    if (targetDate > todayDate) {
       throw new BadRequestException('Non puoi chiudere una giornata futura');
     }
 
@@ -93,8 +91,7 @@ export class DayStatusService {
   }
 
   async reopenDay(userId: string, date: string) {
-    const targetDate = new Date(date);
-    targetDate.setHours(0, 0, 0, 0);
+    const targetDate = parseDateUTC(date);
 
     return this.prisma.dayStatus.upsert({
       where: {
@@ -121,10 +118,8 @@ export class DayStatusService {
   }
 
   async getStatusesByUserAndDateRange(userId: string, startDate: string, endDate: string) {
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
+    const start = parseDateUTC(startDate);
+    const end = parseDateUTC(endDate);
 
     return this.prisma.dayStatus.findMany({
       where: {

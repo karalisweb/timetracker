@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { parseDateUTC, formatDateUTC, getWeekStartUTC, getWeekEndUTC } from '../common/date.utils';
 
 @Injectable()
 export class AdminService {
   constructor(private prisma: PrismaService) {}
 
   async getComplianceDashboard() {
-    const today = new Date();
-    const weekStart = this.getWeekStart(today);
-    const weekEnd = this.getWeekEnd(weekStart);
+    const weekStart = getWeekStartUTC();
+    const weekEnd = getWeekEndUTC(weekStart);
 
     // Mostra tutti gli utenti (inclusi admin)
     const users = await this.prisma.user.findMany({
@@ -87,18 +87,17 @@ export class AdminService {
     );
 
     return {
-      weekStart: weekStart.toISOString().split('T')[0],
-      weekEnd: weekEnd.toISOString().split('T')[0],
+      weekStart: formatDateUTC(weekStart),
+      weekEnd: formatDateUTC(weekEnd),
       users: compliance,
     };
   }
 
   async getUserWeekDetail(userId: string, weekStartStr?: string) {
     const weekStart = weekStartStr
-      ? new Date(weekStartStr)
-      : this.getWeekStart(new Date());
-    weekStart.setHours(0, 0, 0, 0);
-    const weekEnd = this.getWeekEnd(weekStart);
+      ? getWeekStartUTC(parseDateUTC(weekStartStr))
+      : getWeekStartUTC();
+    const weekEnd = getWeekEndUTC(weekStart);
 
     // Info utente
     const user = await this.prisma.user.findUnique({
@@ -147,15 +146,14 @@ export class AdminService {
     // Costruisci i giorni della settimana
     const days = [];
     for (let i = 0; i < 7; i++) {
-      const date = new Date(weekStart);
-      date.setDate(date.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
+      const d = new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000);
+      const dateStr = formatDateUTC(d);
 
       const dayEntries = entries.filter(
-        (e) => e.date.toISOString().split('T')[0] === dateStr,
+        (e) => formatDateUTC(new Date(e.date)) === dateStr,
       );
       const dayStatus = dayStatuses.find(
-        (s) => s.date.toISOString().split('T')[0] === dateStr,
+        (s) => formatDateUTC(new Date(s.date)) === dateStr,
       );
 
       const totalMinutes = dayEntries.reduce(
@@ -165,7 +163,7 @@ export class AdminService {
 
       days.push({
         date: dateStr,
-        dayOfWeek: date.getDay() === 0 ? 7 : date.getDay(),
+        dayOfWeek: d.getUTCDay() === 0 ? 7 : d.getUTCDay(),
         totalMinutes,
         targetMinutes: user.dailyTargetMinutes,
         status: dayStatus?.status || 'open',
@@ -198,8 +196,8 @@ export class AdminService {
         email: user.email,
         dailyTargetMinutes: user.dailyTargetMinutes,
       },
-      weekStart: weekStart.toISOString().split('T')[0],
-      weekEnd: weekEnd.toISOString().split('T')[0],
+      weekStart: formatDateUTC(weekStart),
+      weekEnd: formatDateUTC(weekEnd),
       days,
       totalMinutes: days.reduce((sum, d) => sum + d.totalMinutes, 0),
       weeklyTargetMinutes: user.dailyTargetMinutes * user.workingDays.length,
@@ -209,10 +207,8 @@ export class AdminService {
   }
 
   async exportCsv(from: string, to: string) {
-    const fromDate = new Date(from);
-    fromDate.setHours(0, 0, 0, 0);
-    const toDate = new Date(to);
-    toDate.setHours(23, 59, 59, 999);
+    const fromDate = parseDateUTC(from);
+    const toDate = parseDateUTC(to);
 
     const entries = await this.prisma.timeEntry.findMany({
       where: {
@@ -236,28 +232,12 @@ export class AdminService {
     const header = 'Data,Utente,Email,Progetto,Codice Progetto,Minuti,Note\n';
     const rows = entries
       .map((e) => {
-        const date = e.date.toISOString().split('T')[0];
+        const date = formatDateUTC(new Date(e.date));
         const notes = e.notes ? `"${e.notes.replace(/"/g, '""')}"` : '';
         return `${date},${e.user.name},${e.user.email},${e.project.name},${e.project.code || ''},${e.durationMinutes},${notes}`;
       })
       .join('\n');
 
     return header + rows;
-  }
-
-  private getWeekStart(date: Date): Date {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(d.setDate(diff));
-    monday.setHours(0, 0, 0, 0);
-    return monday;
-  }
-
-  private getWeekEnd(weekStart: Date): Date {
-    const sunday = new Date(weekStart);
-    sunday.setDate(sunday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
-    return sunday;
   }
 }

@@ -6,6 +6,7 @@ import { WeeklyService } from '../weekly/weekly.service';
 import { SlackService } from './slack.service';
 import { EmailService } from './email.service';
 import { ReminderType, ReminderChannel } from '@prisma/client';
+import { getTodayStr } from '../common/date.utils';
 
 @Injectable()
 export class ReminderService {
@@ -63,7 +64,7 @@ export class ReminderService {
       },
     });
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayStr();
 
     for (const user of users) {
       try {
@@ -123,7 +124,7 @@ export class ReminderService {
       },
     });
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayStr();
 
     for (const user of users) {
       try {
