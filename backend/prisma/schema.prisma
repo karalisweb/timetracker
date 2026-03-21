@@ -18,6 +18,7 @@ enum DayStatusType {
   open
   closed_complete
   closed_incomplete
+  day_off
 }
 
 enum ReminderType {

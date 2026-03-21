@@ -57,7 +57,7 @@ export interface DayStatus {
   id?: string;
   userId?: string;
   date: string;
-  status: 'open' | 'closed_complete' | 'closed_incomplete';
+  status: 'open' | 'closed_complete' | 'closed_incomplete' | 'day_off';
   closedAt?: string;
 }
 
@@ -65,7 +65,7 @@ export interface TodaySummary {
   date: string;
   totalMinutes: number;
   targetMinutes: number;
-  status: 'open' | 'closed_complete' | 'closed_incomplete';
+  status: 'open' | 'closed_complete' | 'closed_incomplete' | 'day_off';
   isComplete: boolean;
 }
 
@@ -73,7 +73,7 @@ export interface WeekDay {
   date: string;
   dayOfWeek: number;
   minutes: number;
-  status: 'open' | 'closed_complete' | 'closed_incomplete';
+  status: 'open' | 'closed_complete' | 'closed_incomplete' | 'day_off';
   entriesCount: number;
 }
 

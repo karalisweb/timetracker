@@ -117,6 +117,55 @@ export class DayStatusService {
     return status.status !== 'open';
   }
 
+  async isDayOff(userId: string, date: string): Promise<boolean> {
+    const status = await this.getStatus(userId, date);
+    return status.status === 'day_off';
+  }
+
+  async setDayOff(userId: string, date: string) {
+    const targetDate = parseDateUTC(date);
+
+    return this.prisma.dayStatus.upsert({
+      where: {
+        userId_date: {
+          userId,
+          date: targetDate,
+        },
+      },
+      create: {
+        userId,
+        date: targetDate,
+        status: 'day_off',
+      },
+      update: {
+        status: 'day_off',
+        closedAt: null,
+      },
+    });
+  }
+
+  async removeDayOff(userId: string, date: string) {
+    const targetDate = parseDateUTC(date);
+
+    return this.prisma.dayStatus.upsert({
+      where: {
+        userId_date: {
+          userId,
+          date: targetDate,
+        },
+      },
+      create: {
+        userId,
+        date: targetDate,
+        status: 'open',
+      },
+      update: {
+        status: 'open',
+        closedAt: null,
+      },
+    });
+  }
+
   async getStatusesByUserAndDateRange(userId: string, startDate: string, endDate: string) {
     const start = parseDateUTC(startDate);
     const end = parseDateUTC(endDate);

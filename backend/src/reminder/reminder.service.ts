@@ -73,6 +73,12 @@ export class ReminderService {
           continue;
         }
 
+        // Salta se giornata è day_off (ferie)
+        const isDayOff = await this.dayStatusService.isDayOff(user.id, today);
+        if (isDayOff) {
+          continue;
+        }
+
         // Verifica giornata chiusa
         const isDayClosed = await this.dayStatusService.isDayClosed(user.id, today);
         if (isDayClosed) {
@@ -130,6 +136,12 @@ export class ReminderService {
       try {
         // Verifica se siamo dopo fine lavoro + grace
         if (!this.isAfterWorkingHours(user, graceMinutes)) {
+          continue;
+        }
+
+        // Salta se giornata è day_off (ferie)
+        const isDayOff = await this.dayStatusService.isDayOff(user.id, today);
+        if (isDayOff) {
           continue;
         }
 
@@ -258,6 +270,12 @@ export class ReminderService {
           continue;
         }
 
+        // Salta se ieri era day_off (ferie)
+        const isDayOff = await this.dayStatusService.isDayOff(user.id, yesterdayStr);
+        if (isDayOff) {
+          continue;
+        }
+
         // Verifica se ieri è rimasto aperto
         const isDayClosed = await this.dayStatusService.isDayClosed(user.id, yesterdayStr);
         if (isDayClosed) {
@@ -347,6 +365,10 @@ export class ReminderService {
       const isoDay = yesterdayDayOfWeek === 0 ? 7 : yesterdayDayOfWeek;
       if (!user.workingDays.includes(isoDay)) continue;
 
+      // Salta se era in ferie
+      const isDayOff = await this.dayStatusService.isDayOff(user.id, yesterdayStr);
+      if (isDayOff) continue;
+
       const isDayClosed = await this.dayStatusService.isDayClosed(user.id, yesterdayStr);
       if (!isDayClosed) {
         unclosedYesterday.push(user.name);
@@ -428,10 +450,13 @@ export class ReminderService {
     let previousDayDate: string | null = null;
 
     if (user.workingDays.includes(isoDay)) {
-      const isDayClosed = await this.dayStatusService.isDayClosed(userId, yesterdayStr);
-      if (!isDayClosed) {
-        previousDayOpen = true;
-        previousDayDate = yesterdayStr;
+      const isDayOff = await this.dayStatusService.isDayOff(userId, yesterdayStr);
+      if (!isDayOff) {
+        const isDayClosed = await this.dayStatusService.isDayClosed(userId, yesterdayStr);
+        if (!isDayClosed) {
+          previousDayOpen = true;
+          previousDayDate = yesterdayStr;
+        }
       }
     }
 
@@ -459,8 +484,11 @@ export class ReminderService {
       for (const u of allUsers) {
         const uIsoDay = yesterdayDayOfWeek === 0 ? 7 : yesterdayDayOfWeek;
         if (u.workingDays.includes(uIsoDay)) {
-          const closed = await this.dayStatusService.isDayClosed(u.id, yesterdayStr);
-          if (!closed) unclosedYesterday.push(u.name);
+          const dayOff = await this.dayStatusService.isDayOff(u.id, yesterdayStr);
+          if (!dayOff) {
+            const closed = await this.dayStatusService.isDayClosed(u.id, yesterdayStr);
+            if (!closed) unclosedYesterday.push(u.name);
+          }
         }
         const submitted = await this.weeklyService.getPreviousWeekStatus(u.id);
         if (!submitted) weekNotSubmittedUsers.push(u.name);

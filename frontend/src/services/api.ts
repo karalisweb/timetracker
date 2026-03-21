@@ -70,6 +70,8 @@ export const dayStatusApi = {
   getTodaySummary: () => api.get('/day-status/today-summary'),
   close: (date?: string) => api.post('/day-status/close', { date }),
   reopen: (date?: string) => api.post('/day-status/reopen', { date }),
+  setDayOff: (date?: string) => api.post('/day-status/day-off', { date }),
+  removeDayOff: (date?: string) => api.post('/day-status/remove-day-off', { date }),
 };
 
 // Weekly

@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { timeEntriesApi, dayStatusApi, projectsApi } from '../services/api';
 import { TimeEntry, TodaySummary, Project } from '../types';
-import { Plus, Trash2, Edit2, Check, X, Clock, Target, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Clock, Target, CheckCircle2, AlertCircle, Palmtree } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import SearchableSelect from '../components/SearchableSelect';
@@ -167,12 +167,32 @@ export default function Dashboard() {
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
 
+  const handleSetDayOff = async () => {
+    try {
+      await dayStatusApi.setDayOff(selectedDate);
+      loadData();
+    } catch (error) {
+      console.error('Error setting day off:', error);
+    }
+  };
+
+  const handleRemoveDayOff = async () => {
+    try {
+      await dayStatusApi.removeDayOff(selectedDate);
+      loadData();
+    } catch (error) {
+      console.error('Error removing day off:', error);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'closed_complete':
         return 'text-green-400 bg-green-500/20';
       case 'closed_incomplete':
         return 'text-yellow-400 bg-yellow-500/20';
+      case 'day_off':
+        return 'text-purple-400 bg-purple-500/20';
       default:
         return 'text-blue-400 bg-blue-500/20';
     }
@@ -184,6 +204,8 @@ export default function Dashboard() {
         return 'Chiusa (completa)';
       case 'closed_incomplete':
         return 'Chiusa (incompleta)';
+      case 'day_off':
+        return 'Ferie / Assenza';
       default:
         return 'Aperta';
     }
@@ -258,7 +280,12 @@ export default function Dashboard() {
           {/* Actions */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="text-sm">
-              {summary.isComplete ? (
+              {summary.status === 'day_off' ? (
+                <span className="flex items-center text-purple-400">
+                  <Palmtree className="h-4 w-4 mr-1" />
+                  Giornata segnata come ferie/assenza
+                </span>
+              ) : summary.isComplete ? (
                 <span className="flex items-center text-green-400">
                   <CheckCircle2 className="h-4 w-4 mr-1" />
                   Target raggiunto!
@@ -271,21 +298,39 @@ export default function Dashboard() {
               )}
             </div>
 
-            {summary.status === 'open' ? (
-              <button
-                onClick={() => setShowCloseModal(true)}
-                className="w-full sm:w-auto px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 font-medium transition-colors"
-              >
-                Chiudi giornata
-              </button>
-            ) : (
-              <button
-                onClick={handleReopenDay}
-                className="w-full sm:w-auto px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 font-medium transition-colors"
-              >
-                Riapri giornata
-              </button>
-            )}
+            <div className="flex flex-col sm:flex-row gap-2">
+              {summary.status === 'day_off' ? (
+                <button
+                  onClick={handleRemoveDayOff}
+                  className="w-full sm:w-auto px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 font-medium transition-colors"
+                >
+                  Rimuovi ferie
+                </button>
+              ) : summary.status === 'open' ? (
+                <>
+                  <button
+                    onClick={handleSetDayOff}
+                    className="w-full sm:w-auto px-4 py-2 border border-purple-500/40 text-purple-300 rounded-lg hover:bg-purple-500/10 font-medium transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <Palmtree className="h-4 w-4" />
+                    Ferie
+                  </button>
+                  <button
+                    onClick={() => setShowCloseModal(true)}
+                    className="w-full sm:w-auto px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-600 font-medium transition-colors"
+                  >
+                    Chiudi giornata
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handleReopenDay}
+                  className="w-full sm:w-auto px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 font-medium transition-colors"
+                >
+                  Riapri giornata
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { weeklyApi } from '../services/api';
 import { WeeklyStatus } from '../types';
-import { Calendar, CheckCircle2, Clock, Send, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, Send, AlertCircle, ChevronLeft, ChevronRight, Palmtree } from 'lucide-react';
 import { format, parseISO, addDays, getISOWeek, startOfISOWeek } from 'date-fns';
 import { it } from 'date-fns/locale';
 
@@ -88,6 +88,8 @@ export default function Week() {
         return <CheckCircle2 className="h-5 w-5 text-green-400" />;
       case 'closed_incomplete':
         return <AlertCircle className="h-5 w-5 text-yellow-400" />;
+      case 'day_off':
+        return <Palmtree className="h-5 w-5 text-purple-400" />;
       default:
         return <Clock className="h-5 w-5 text-gray-500" />;
     }
@@ -99,6 +101,8 @@ export default function Week() {
         return 'bg-green-500/10 border-green-500/30 hover:bg-green-500/20';
       case 'closed_incomplete':
         return 'bg-yellow-500/10 border-yellow-500/30 hover:bg-yellow-500/20';
+      case 'day_off':
+        return 'bg-purple-500/10 border-purple-500/30 hover:bg-purple-500/20';
       default:
         return 'bg-dark-800 border-dark-700 hover:bg-dark-750';
     }
@@ -120,7 +124,8 @@ export default function Week() {
     );
   }
 
-  const closedDays = weekData.days.filter(d => d.status !== 'open').length;
+  const closedDays = weekData.days.filter(d => d.status !== 'open' && d.status !== 'day_off').length;
+  const dayOffCount = weekData.days.filter(d => d.status === 'day_off').length;
   const workingDays = weekData.days.filter(d => d.dayOfWeek >= 1 && d.dayOfWeek <= 5).length;
   const weekNumber = getISOWeek(parseISO(weekData.weekStart));
 
@@ -193,7 +198,10 @@ export default function Week() {
             </div>
             <div>
               <p className="text-gray-400 text-sm">Giornate chiuse</p>
-              <p className="text-2xl font-bold text-white">{closedDays}/{workingDays}</p>
+              <p className="text-2xl font-bold text-white">
+                {closedDays}/{workingDays - dayOffCount}
+                {dayOffCount > 0 && <span className="text-sm text-purple-400 ml-1">+{dayOffCount} ferie</span>}
+              </p>
             </div>
           </div>
         </div>
@@ -232,7 +240,9 @@ export default function Week() {
                 {format(dateObj, 'dd/MM')}
               </div>
               <div className="text-sm text-gray-400">
-                {day.minutes > 0 ? formatMinutes(day.minutes) : '-'}
+                {day.status === 'day_off' ? (
+                  <span className="text-purple-400">Ferie</span>
+                ) : day.minutes > 0 ? formatMinutes(day.minutes) : '-'}
               </div>
               {day.entriesCount > 0 && (
                 <div className="text-xs text-gray-500 mt-1">

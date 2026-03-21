@@ -38,4 +38,16 @@ export class DayStatusController {
     const date = closeDayDto.date || new Date().toISOString().split('T')[0];
     return this.dayStatusService.reopenDay(req.user.sub, date);
   }
+
+  @Post('day-off')
+  async setDayOff(@Request() req: any, @Body() body: CloseDayDto) {
+    const date = body.date || new Date().toISOString().split('T')[0];
+    return this.dayStatusService.setDayOff(req.user.sub, date);
+  }
+
+  @Post('remove-day-off')
+  async removeDayOff(@Request() req: any, @Body() body: CloseDayDto) {
+    const date = body.date || new Date().toISOString().split('T')[0];
+    return this.dayStatusService.removeDayOff(req.user.sub, date);
+  }
 }
