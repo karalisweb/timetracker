@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Clock, Calendar, ClipboardCheck, BarChart3, Menu } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Clock, Calendar, Menu } from 'lucide-react';
 
 interface BottomNavProps {
   onMenuClick: () => void;
@@ -8,30 +7,19 @@ interface BottomNavProps {
 
 export default function BottomNav({ onMenuClick }: BottomNavProps) {
   const location = useLocation();
-  const { canAccessOrchestration } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
-  const isActivePrefix = (prefix: string) => location.pathname.startsWith(prefix);
 
-  // Voci base sempre visibili
-  const baseItems = [
+  const navItems = [
     { path: '/', label: 'Oggi', icon: Clock },
     { path: '/week', label: 'Settimana', icon: Calendar },
   ];
-
-  // Voci orchestration (visibili solo se autorizzato)
-  const orchestrationItems = canAccessOrchestration ? [
-    { path: '/orchestration', label: 'Workflow', icon: ClipboardCheck },
-    { path: '/admin/compliance', label: 'Compliance', icon: BarChart3 },
-  ] : [];
-
-  const navItems = [...baseItems, ...orchestrationItems];
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-dark-850 border-t border-dark-700 px-2 py-2 z-50">
       <div className="flex items-center justify-around">
         {navItems.map((item) => {
-          const active = isActive(item.path) || (item.path === '/orchestration' && isActivePrefix('/orchestration'));
+          const active = isActive(item.path);
           return (
             <Link
               key={item.path}

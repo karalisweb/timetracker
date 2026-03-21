@@ -6,6 +6,38 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/) e i
 
 ---
 
+## [1.3.0] - 2026-03-21
+
+### Aggiunto
+- **Modifica data entry**: il form di modifica ora include un campo data per spostare una registrazione da un giorno all'altro
+- **Navigazione settimana → giorno**: cliccando una card giorno nella vista settimanale si apre la Dashboard di quel giorno
+- **CLAUDE.md**: mappa del codice per orientarsi velocemente nel progetto
+- **Test unitari**: 16 test per i calcoli date in WeeklyService (Jest + ts-jest)
+- **Test E2E**: test di protezione auth per tutti gli endpoint API (supertest)
+- **Feedback errori invio settimana**: il modal mostra un messaggio di errore in caso di fallimento
+
+### Corretto
+- **Bug calcolo settimane**: riscritto `getWeekStart` usando aritmetica millisecondi invece di `setDate` — risolve il bug al cambio mese (fine febbraio → marzo)
+- **Bug timezone date**: `new Date("YYYY-MM-DD")` creava UTC midnight che in CET spostava la data di un giorno. Introdotto `parseLocalDate()` e `formatDateStr()` per evitare conversioni UTC
+- **Bug invio settimane passate**: il parsing timezone causava mismatch tra weekStart di `getCurrentWeekStatus` e `submitWeek`, impedendo l'invio
+
+### Migliorato
+- **Vista settimanale**: titolo con numero settimana e range date (non piu "settimana passata"), giorni mostrano dd/MM, label in italiano
+- **Calcolo `isCurrentWeek`**: usa `startOfISOWeek` di date-fns invece di calcolo manuale
+
+### Rimosso
+- **Modulo Orchestration** (backend + frontend): progetti, checklist, gate, template — spostato in app separata
+- **Modulo Asana** (backend + frontend): client, webhook, task sync, pagina config
+- **Modulo AI** (backend): generazione task OpenAI
+- **Modulo Config Panel** (backend): configurazione Asana criptata
+- **OrchestrationGuard** e relativi riferimenti in auth, routing, navigazione
+- **Modelli Prisma**: OrchProject, ChecklistTemplate, ChecklistInstance, ChecklistItemTemplate, ExecutionTask, Gate, GateRequirement, AsanaWebhookEvent, AppConfig
+- **Campo `asanaUserId`** da User (schema, DTO, service)
+- **docs/orchestration/**: 12 file di documentazione tecnica
+- **specifiche_tecniche_app_orchestratore_progetti_asana.md**
+
+---
+
 ## [1.2.0] - 2026-02-23
 
 ### Aggiornato
@@ -105,16 +137,8 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/) e i
   - AuthContext con JWT
   - Servizio API centralizzato
   - Layout responsive con Sidebar (desktop) e BottomNav (mobile)
-- **Modulo Orchestration** (Project Orchestration):
-  - Backend: moduli `orchestration/`, `ai/`, `asana/`, `config-panel/`
-  - Gestione progetti con checklist, gate (published/delivered) e task Asana
-  - Generazione task AI via OpenAI
-  - Integrazione Asana con webhook
-  - Pannello configurazione Asana
-  - Frontend: pagine OrchProjects, OrchProjectCreate, OrchProjectCreateAI, OrchProjectDetail
-  - Documentazione completa in `docs/orchestration/`
 - **Database PostgreSQL** con 18 modelli Prisma e 8 enum
 
 ---
 
-*Ultimo aggiornamento: 2026-02-16*
+*Ultimo aggiornamento: 2026-03-21*

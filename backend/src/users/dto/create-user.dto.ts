@@ -51,7 +51,4 @@ export class CreateUserDto {
   @IsEnum(ReminderChannelPreference)
   reminderChannel?: ReminderChannelPreference;
 
-  @IsOptional()
-  @IsString()
-  asanaUserId?: string;
 }

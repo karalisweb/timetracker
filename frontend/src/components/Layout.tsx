@@ -1,12 +1,12 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Clock, Calendar, Users, FolderKanban, BarChart3, LogOut, X, UserCircle, Link2, ClipboardCheck } from 'lucide-react';
+import { Clock, Calendar, Users, FolderKanban, BarChart3, LogOut, X, UserCircle } from 'lucide-react';
 import { useState } from 'react';
 import Header from './Header';
 import BottomNav from './BottomNav';
 
 export default function Layout() {
-  const { user, logout, isAdmin, canAccessOrchestration } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -17,11 +17,9 @@ export default function Layout() {
   };
 
   const isActive = (path: string) => location.pathname === path;
-  const isActivePrefix = (prefix: string) => location.pathname.startsWith(prefix);
 
   const isItemActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
-    if (path === '/orchestration') return isActivePrefix('/orchestration');
     return isActive(path);
   };
 
@@ -40,20 +38,12 @@ export default function Layout() {
       ],
     },
     {
-      title: 'ORCHESTRATION',
-      show: canAccessOrchestration,
-      items: [
-        { path: '/orchestration', label: 'Workflow', icon: ClipboardCheck },
-        { path: '/admin/compliance', label: 'Compliance', icon: BarChart3 },
-      ],
-    },
-    {
-      title: 'IMPOSTAZIONI',
+      title: 'AMMINISTRAZIONE',
       show: isAdmin,
       items: [
+        { path: '/admin/compliance', label: 'Compliance', icon: BarChart3 },
         { path: '/admin/projects', label: 'Progetti', icon: FolderKanban },
         { path: '/admin/users', label: 'Utenti', icon: Users },
-        { path: '/admin/asana', label: 'Asana', icon: Link2 },
       ],
     },
   ];
@@ -72,7 +62,7 @@ export default function Layout() {
               KW Time Report
             </span>
             <span className="text-xs text-dark-500">
-              v1.2.0
+              v1.3.0
             </span>
           </div>
         </div>
@@ -166,12 +156,12 @@ export default function Layout() {
               {isAdmin && (
                 <>
                   <div className="pb-1">
-                    <p className="px-3 text-xs font-semibold uppercase text-dark-500">Impostazioni</p>
+                    <p className="px-3 text-xs font-semibold uppercase text-dark-500">Amministrazione</p>
                   </div>
                   {[
+                    { path: '/admin/compliance', label: 'Compliance', icon: BarChart3 },
                     { path: '/admin/projects', label: 'Progetti', icon: FolderKanban },
                     { path: '/admin/users', label: 'Utenti', icon: Users },
-                    { path: '/admin/asana', label: 'Asana', icon: Link2 },
                   ].map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.path);
@@ -224,7 +214,7 @@ export default function Layout() {
               </div>
 
               <div className="pt-4 text-center">
-                <p className="text-xs text-dark-500">KW Time Report v1.2.0</p>
+                <p className="text-xs text-dark-500">KW Time Report v1.3.0</p>
               </div>
             </div>
           </>

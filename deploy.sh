@@ -191,6 +191,12 @@ if [ -n "$BUMP_TYPE" ]; then
         success "README.md"
     fi
 
+    # CLAUDE.md (versione + data)
+    if [ -f "${SCRIPT_DIR}/CLAUDE.md" ]; then
+        sed -i '' "s/Aggiornato alla versione \*\*[0-9]*\.[0-9]*\.[0-9]*\*\*/Aggiornato alla versione \*\*${NEW_VERSION}\*\*/" "${SCRIPT_DIR}/CLAUDE.md"
+        success "CLAUDE.md"
+    fi
+
     # CHANGELOG.md (inserisce nuova entry automatica)
     if [ -f "${SCRIPT_DIR}/CHANGELOG.md" ]; then
         TODAY=$(date +%Y-%m-%d)
@@ -206,6 +212,15 @@ if [ -n "$BUMP_TYPE" ]; then
         {print}' "${SCRIPT_DIR}/CHANGELOG.md" > "${SCRIPT_DIR}/CHANGELOG.tmp" && mv "${SCRIPT_DIR}/CHANGELOG.tmp" "${SCRIPT_DIR}/CHANGELOG.md"
         success "CHANGELOG.md (nuova entry)"
     fi
+
+    # Aggiorna data "Ultimo aggiornamento" in tutti i doc
+    TODAY=$(date +%Y-%m-%d)
+    for DOC in README.md CHANGELOG.md USER-GUIDE.md CLAUDE.md; do
+        if [ -f "${SCRIPT_DIR}/${DOC}" ]; then
+            sed -i '' "s/Ultimo aggiornamento: [0-9-]*/Ultimo aggiornamento: ${TODAY}/" "${SCRIPT_DIR}/${DOC}"
+        fi
+    done
+    success "Date aggiornate in tutti i documenti"
 
     APP_VERSION="$NEW_VERSION"
     success "Versione aggiornata a ${NEW_VERSION}"
@@ -395,6 +410,7 @@ if [ -n "$BUMP_TYPE" ]; then
     echo -e "    - Layout.tsx (UI)"
     echo -e "    - USER-GUIDE.md"
     echo -e "    - README.md"
+    echo -e "    - CLAUDE.md"
     echo -e "    - CHANGELOG.md"
 fi
 echo ""

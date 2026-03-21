@@ -33,7 +33,6 @@ export class UsersService {
         dailyTargetMinutes: true,
         slackUserId: true,
         reminderChannel: true,
-        asanaUserId: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -56,7 +55,6 @@ export class UsersService {
         dailyTargetMinutes: createUserDto.dailyTargetMinutes || 480,
         slackUserId: createUserDto.slackUserId,
         reminderChannel: createUserDto.reminderChannel || 'slack_only',
-        asanaUserId: createUserDto.asanaUserId,
       },
       select: {
         id: true,
@@ -69,7 +67,6 @@ export class UsersService {
         dailyTargetMinutes: true,
         slackUserId: true,
         reminderChannel: true,
-        asanaUserId: true,
         createdAt: true,
       },
     });
@@ -97,7 +94,6 @@ export class UsersService {
         dailyTargetMinutes: true,
         slackUserId: true,
         reminderChannel: true,
-        asanaUserId: true,
         createdAt: true,
         updatedAt: true,
       },

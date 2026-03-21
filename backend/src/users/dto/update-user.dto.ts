@@ -46,7 +46,4 @@ export class UpdateUserDto {
   @IsEnum(ReminderChannelPreference)
   reminderChannel?: ReminderChannelPreference;
 
-  @IsOptional()
-  @IsString()
-  asanaUserId?: string;
 }

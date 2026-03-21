@@ -21,7 +21,6 @@ interface AuthContextType {
   isAdmin: boolean;
   isPM: boolean;
   isSenior: boolean;
-  canAccessOrchestration: boolean;
   hasRole: (role: string) => boolean;
   twoFactorState: TwoFactorState | null;
 }
@@ -127,12 +126,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = hasRole('admin');
   const isPM = hasRole('pm');
   const isSenior = hasRole('senior');
-  const canAccessOrchestration = isAdmin || isPM || isSenior;
-
   return (
     <AuthContext.Provider value={{
       user, token, login, verifyLoginOtp, cancelTwoFactor, logout, refreshUser, isLoading,
-      isAdmin, isPM, isSenior, canAccessOrchestration, hasRole, twoFactorState
+      isAdmin, isPM, isSenior, hasRole, twoFactorState
     }}>
       {children}
     </AuthContext.Provider>

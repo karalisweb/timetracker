@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { timeEntriesApi, dayStatusApi, projectsApi } from '../services/api';
 import { TimeEntry, TodaySummary, Project } from '../types';
@@ -8,7 +9,9 @@ import { it } from 'date-fns/locale';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const dateFromUrl = searchParams.get('date');
+  const [selectedDate, setSelectedDate] = useState(dateFromUrl || format(new Date(), 'yyyy-MM-dd'));
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [summary, setSummary] = useState<TodaySummary | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -21,11 +24,28 @@ export default function Dashboard() {
     projectId: '',
     durationMinutes: '',
     notes: '',
+    date: '',
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isToday = selectedDate === format(new Date(), 'yyyy-MM-dd');
+
+  // Sync date from URL (when navigating from Week view)
+  useEffect(() => {
+    if (dateFromUrl && dateFromUrl !== selectedDate) {
+      setSelectedDate(dateFromUrl);
+    }
+  }, [dateFromUrl]);
+
+  // Clear URL param when user changes date manually
+  const handleDateChange = (newDate: string) => {
+    setSelectedDate(newDate);
+    if (searchParams.has('date')) {
+      searchParams.delete('date');
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -75,6 +95,7 @@ export default function Dashboard() {
       if (editingId) {
         await timeEntriesApi.update(editingId, {
           projectId: formData.projectId,
+          date: formData.date || selectedDate,
           durationMinutes: parseInt(formData.durationMinutes),
           notes: formData.notes || undefined,
         });
@@ -87,7 +108,7 @@ export default function Dashboard() {
         });
       }
 
-      setFormData({ projectId: '', durationMinutes: '', notes: '' });
+      setFormData({ projectId: '', durationMinutes: '', notes: '', date: '' });
       setShowForm(false);
       setEditingId(null);
       loadData();
@@ -103,6 +124,7 @@ export default function Dashboard() {
       projectId: entry.projectId,
       durationMinutes: entry.durationMinutes.toString(),
       notes: entry.notes || '',
+      date: typeof entry.date === 'string' ? entry.date.split('T')[0] : selectedDate,
     });
     setEditingId(entry.id);
     setShowForm(true);
@@ -193,7 +215,7 @@ export default function Dashboard() {
         <input
           type="date"
           value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
+          onChange={(e) => handleDateChange(e.target.value)}
           max={format(new Date(), 'yyyy-MM-dd')}
           className="w-full sm:w-auto px-3 py-2 bg-dark-800 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
@@ -276,7 +298,7 @@ export default function Dashboard() {
               onClick={() => {
                 setShowForm(true);
                 setEditingId(null);
-                setFormData({ projectId: '', durationMinutes: '', notes: '' });
+                setFormData({ projectId: '', durationMinutes: '', notes: '', date: '' });
               }}
               className="flex items-center px-3 py-1.5 bg-amber-500 text-black rounded-lg hover:bg-amber-600 text-sm font-medium transition-colors"
             >
@@ -308,6 +330,21 @@ export default function Dashboard() {
                   ))}
                 </select>
               </div>
+
+              {editingId && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Data
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    max={format(new Date(), 'yyyy-MM-dd')}
+                    className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">

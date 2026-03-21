@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { weeklyApi } from '../services/api';
 import { WeeklyStatus } from '../types';
 import { Calendar, CheckCircle2, Clock, Send, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, parseISO, addDays } from 'date-fns';
+import { format, parseISO, addDays, getISOWeek, startOfISOWeek } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 export default function Week() {
+  const navigate = useNavigate();
   const [weekData, setWeekData] = useState<WeeklyStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [selectedWeekStart, setSelectedWeekStart] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     loadWeek(selectedWeekStart || undefined);
@@ -30,11 +33,14 @@ export default function Week() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       await weeklyApi.submit(weekData?.weekStart);
       setShowSubmitModal(false);
       loadWeek(selectedWeekStart || undefined);
-    } catch (error) {
+    } catch (error: any) {
+      const msg = error.response?.data?.message || 'Errore durante l\'invio della settimana';
+      setSubmitError(msg);
       console.error('Error submitting week:', error);
     } finally {
       setIsSubmitting(false);
@@ -54,15 +60,15 @@ export default function Week() {
     setSelectedWeekStart(next);
   };
 
+  const handleDayClick = (dateStr: string) => {
+    // Navigate to Dashboard and set the date via URL search params
+    navigate(`/?date=${dateStr}`);
+  };
+
   const isCurrentWeek = (() => {
     if (!weekData) return true;
-    const today = new Date();
-    const day = today.getDay();
-    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(today);
-    monday.setDate(diff);
-    const mondayStr = monday.toISOString().split('T')[0];
-    return weekData.weekStart === mondayStr;
+    const currentMonday = format(startOfISOWeek(new Date()), 'yyyy-MM-dd');
+    return weekData.weekStart === currentMonday;
   })();
 
   const formatMinutes = (minutes: number) => {
@@ -90,11 +96,11 @@ export default function Week() {
   const getStatusBg = (status: string) => {
     switch (status) {
       case 'closed_complete':
-        return 'bg-green-500/10 border-green-500/30';
+        return 'bg-green-500/10 border-green-500/30 hover:bg-green-500/20';
       case 'closed_incomplete':
-        return 'bg-yellow-500/10 border-yellow-500/30';
+        return 'bg-yellow-500/10 border-yellow-500/30 hover:bg-yellow-500/20';
       default:
-        return 'bg-dark-800 border-dark-700';
+        return 'bg-dark-800 border-dark-700 hover:bg-dark-750';
     }
   };
 
@@ -116,6 +122,7 @@ export default function Week() {
 
   const closedDays = weekData.days.filter(d => d.status !== 'open').length;
   const workingDays = weekData.days.filter(d => d.dayOfWeek >= 1 && d.dayOfWeek <= 5).length;
+  const weekNumber = getISOWeek(parseISO(weekData.weekStart));
 
   return (
     <div className="space-y-6">
@@ -131,11 +138,14 @@ export default function Week() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-white">
-              {isCurrentWeek ? 'Settimana corrente' : 'Settimana passata'}
+              Settimana {weekNumber}
             </h1>
             <p className="text-gray-400 text-sm">
-              {format(parseISO(weekData.weekStart), 'd MMM', { locale: it })} -{' '}
+              {format(parseISO(weekData.weekStart), 'd MMM', { locale: it })} –{' '}
               {format(parseISO(weekData.weekEnd), 'd MMM yyyy', { locale: it })}
+              {isCurrentWeek && (
+                <span className="ml-2 text-blue-400">(corrente)</span>
+              )}
             </p>
           </div>
           <button
@@ -207,9 +217,10 @@ export default function Week() {
           const dateObj = parseISO(day.date);
 
           return (
-            <div
+            <button
               key={day.date}
-              className={`rounded-xl border p-4 ${getStatusBg(day.status)} ${
+              onClick={() => handleDayClick(day.date)}
+              className={`rounded-xl border p-4 text-left transition-colors cursor-pointer ${getStatusBg(day.status)} ${
                 isWeekend ? 'opacity-50' : ''
               }`}
             >
@@ -218,17 +229,17 @@ export default function Week() {
                 {getStatusIcon(day.status)}
               </div>
               <div className="text-2xl font-bold text-white mb-1">
-                {format(dateObj, 'd')}
+                {format(dateObj, 'dd/MM')}
               </div>
               <div className="text-sm text-gray-400">
                 {day.minutes > 0 ? formatMinutes(day.minutes) : '-'}
               </div>
               {day.entriesCount > 0 && (
                 <div className="text-xs text-gray-500 mt-1">
-                  {day.entriesCount} {day.entriesCount === 1 ? 'entry' : 'entries'}
+                  {day.entriesCount} {day.entriesCount === 1 ? 'registrazione' : 'registrazioni'}
                 </div>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
@@ -277,9 +288,15 @@ export default function Week() {
                 </span>
               </div>
             )}
+            {submitError && (
+              <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-start">
+                <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                <span>{submitError}</span>
+              </div>
+            )}
             <div className="flex justify-end space-x-3">
               <button
-                onClick={() => setShowSubmitModal(false)}
+                onClick={() => { setShowSubmitModal(false); setSubmitError(null); }}
                 className="px-4 py-2 border border-dark-600 text-gray-300 rounded-lg hover:bg-dark-700 transition-colors"
               >
                 Annulla

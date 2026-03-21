@@ -1,8 +1,8 @@
 # KW Time Report
 
-Sistema di **time tracking e project orchestration** compliance-first per Karalisweb.
+Sistema di **time tracking** compliance-first per Karalisweb.
 
-**Versione attuale:** 1.2.0 | **URL:** https://timereport.karalisdemo.it
+**Versione attuale:** 1.3.0 | **URL:** https://timereport.karalisdemo.it
 
 ---
 
@@ -12,9 +12,11 @@ Sistema di **time tracking e project orchestration** compliance-first per Karali
 - Login con autenticazione JWT
 - **2FA via email OTP** (attivabile/disattivabile)
 - Inserimento time entry (data, durata, progetto, note)
+- **Modifica data entry** — sposta una registrazione da un giorno all'altro
 - Vista giornaliera con totale/target/stato
 - Chiusura giornata (completa/incompleta)
-- Vista settimanale con riepilogo
+- Vista settimanale con numero settimana e date
+- **Navigazione settimana → giorno** — clicca un giorno per vedere il dettaglio
 - Invio settimanale
 
 ### Admin
@@ -22,14 +24,6 @@ Sistema di **time tracking e project orchestration** compliance-first per Karali
 - Gestione progetti (CRUD + assegnazioni utenti)
 - **Dashboard compliance** con vista dettaglio per utente
 - Export CSV timesheet
-- Gestione reminder e test Slack
-
-### Project Orchestration
-- Creazione progetti con checklist e gate (published/delivered)
-- **Generazione task AI** via OpenAI
-- **Integrazione Asana** con webhook e sincronizzazione task
-- Template checklist riutilizzabili (SEO, technical, privacy, performance, backend)
-- Pannello configurazione Asana
 
 ### Reminder Automatici
 - **Soft reminder**: durante orario lavoro se target non raggiunto
@@ -54,7 +48,8 @@ Sistema di **time tracking e project orchestration** compliance-first per Karali
 | **Frontend** | React 19, TypeScript, Vite 7 |
 | **UI** | Tailwind CSS 3.4, Lucide Icons, Karalisweb Design System v2.2 |
 | **Auth** | JWT, bcrypt, 2FA email OTP |
-| **Integrazioni** | Slack API, Nodemailer SMTP, Asana API, OpenAI API |
+| **Notifiche** | Slack API, Nodemailer SMTP |
+| **Test** | Jest, ts-jest, supertest |
 | **Deploy** | PM2, Nginx, rsync |
 
 ---
@@ -134,24 +129,24 @@ SMTP_FROM="Time Report <noreply@karalisdemo.it>"
 
 # Reminder
 REMINDER_GRACE_PERIOD_MINUTES=30
-
-# Asana Integration
-ASANA_ACCESS_TOKEN=""
-ASANA_WORKSPACE_ID=""
-ASANA_DEFAULT_PROJECT_ID=""
-ASANA_FIELD_PROJECT_ID=""
-ASANA_FIELD_CHECKLIST_ID=""
-ASANA_WEBHOOK_SECRET=""
-
-# OpenAI Integration (per generazione task AI)
-OPENAI_API_KEY=""
-OPENAI_MODEL="gpt-4o"
 ```
 
 ### Frontend (.env)
 
 ```env
 VITE_API_URL=http://localhost:3002/api
+```
+
+---
+
+## Test
+
+```bash
+# Unit test (calcoli date, logica business)
+cd backend && npm test
+
+# E2E test API (richiede database attivo)
+cd backend && npm run test:e2e
 ```
 
 ---
@@ -164,7 +159,7 @@ Il deploy e gestito tramite **script automatizzato** (`deploy.sh`). Per la guida
 # Deploy standard
 ./deploy.sh "descrizione delle modifiche"
 
-# Deploy con bump versione
+# Deploy con bump versione (aggiorna automaticamente tutti i file)
 ./deploy.sh --bump patch "fix bug"
 ./deploy.sh --bump minor "nuova feature"
 ./deploy.sh --bump major "breaking change"
@@ -188,29 +183,23 @@ Il deploy e gestito tramite **script automatizzato** (`deploy.sh`). Per la guida
 Time Tracker/
 ├── backend/
 │   ├── prisma/
-│   │   └── schema.prisma          # 22 modelli, 8 enum
+│   │   └── schema.prisma          # 9 modelli, 4 enum
 │   ├── src/
-│   │   ├── admin/                 # Gestione admin (utenti, assegnazioni)
-│   │   ├── ai/                    # Integrazione OpenAI (generazione task)
-│   │   ├── asana/                 # Client Asana, webhook, task sync
+│   │   ├── admin/                 # Gestione admin (utenti, progetti, compliance, export)
 │   │   ├── auth/                  # JWT, login, guard, password reset, 2FA
 │   │   ├── common/                # DTO e guard condivisi
-│   │   ├── config-panel/          # Pannello configurazione Asana
 │   │   ├── day-status/            # Stato giornaliero (aperto/chiuso)
 │   │   ├── email/                 # Servizio invio email SMTP
-│   │   ├── orchestration/         # Progetti, checklist, gate
-│   │   │   ├── checklists/        # Template e istanze checklist
-│   │   │   ├── gates/             # Gate published/delivered
-│   │   │   └── projects/          # CRUD progetti orchestration
 │   │   ├── otp/                   # 2FA: generazione/validazione OTP
 │   │   ├── prisma/                # PrismaService (database)
-│   │   ├── projects/              # CRUD progetti time tracking
+│   │   ├── projects/              # Progetti assegnati
 │   │   ├── reminder/              # Reminder automatici (Slack + Email)
 │   │   ├── time-entries/          # CRUD time entry
 │   │   ├── users/                 # Gestione utenti
 │   │   ├── weekly/                # Submission settimanali
 │   │   ├── app.module.ts          # Root module
 │   │   └── main.ts                # Entry point
+│   ├── test/                      # Test E2E
 │   └── package.json
 ├── frontend/
 │   ├── src/
@@ -220,31 +209,23 @@ Time Tracker/
 │   │   │   └── Layout.tsx         # Layout con sidebar/header
 │   │   ├── context/
 │   │   │   └── AuthContext.tsx     # Context autenticazione JWT
-│   │   ├── hooks/                 # Custom hooks (riservato)
 │   │   ├── pages/
-│   │   │   ├── Dashboard.tsx      # Vista giornaliera
-│   │   │   ├── Week.tsx           # Vista settimanale
+│   │   │   ├── Dashboard.tsx      # Vista giornaliera + form edit con data
+│   │   │   ├── Week.tsx           # Vista settimanale con click-to-day
 │   │   │   ├── Login.tsx          # Login + 2FA OTP
 │   │   │   ├── Settings.tsx       # Impostazioni utente
 │   │   │   ├── ForgotPassword.tsx # Recupero password
 │   │   │   ├── ResetPassword.tsx  # Reset password
-│   │   │   ├── admin/
-│   │   │   │   ├── Compliance.tsx # Dashboard compliance
-│   │   │   │   ├── Projects.tsx   # Gestione progetti
-│   │   │   │   ├── Users.tsx      # Gestione utenti
-│   │   │   │   └── AsanaConfig.tsx# Config integrazione Asana
-│   │   │   └── orchestration/
-│   │   │       ├── OrchProjects.tsx        # Lista progetti
-│   │   │       ├── OrchProjectCreate.tsx   # Crea progetto
-│   │   │       ├── OrchProjectCreateAI.tsx # Crea con AI
-│   │   │       └── OrchProjectDetail.tsx   # Dettaglio progetto
+│   │   │   └── admin/
+│   │   │       ├── Compliance.tsx # Dashboard compliance
+│   │   │       ├── Projects.tsx   # Gestione progetti
+│   │   │       └── Users.tsx      # Gestione utenti
 │   │   ├── services/
 │   │   │   └── api.ts             # Client API centralizzato
 │   │   └── types/
 │   │       └── index.ts           # Definizioni TypeScript
 │   └── package.json
-├── docs/
-│   └── orchestration/             # 12 file di documentazione tecnica
+├── CLAUDE.md                      # Mappa del codice (per sviluppatori)
 ├── CHANGELOG.md                   # Storico modifiche
 ├── DEPLOY.md                      # Guida deploy e infrastruttura
 ├── DESIGN-SYSTEM.md               # Design system Karalisweb v2.2
@@ -260,9 +241,9 @@ Time Tracker/
 
 | Ruolo | Permessi |
 |-------|----------|
-| **Admin** | Gestione completa: utenti, progetti, compliance, configurazioni, orchestration |
-| **PM** | Project Manager: gestione progetti orchestration |
-| **Senior** | Accesso a orchestration e compliance |
+| **Admin** | Gestione completa: utenti, progetti, compliance, export |
+| **PM** | Time tracking (stessi permessi executor) |
+| **Senior** | Time tracking (stessi permessi executor) |
 | **Executor** | Time tracking base: inserimento ore, vista giornaliera/settimanale |
 
 ---
@@ -271,23 +252,27 @@ Time Tracker/
 
 | Documento | Descrizione |
 |-----------|------------|
-| [README.md](README.md) | Overview progetto e setup (questo file) |
+| [CLAUDE.md](CLAUDE.md) | Mappa del codice per orientarsi velocemente |
 | [CHANGELOG.md](CHANGELOG.md) | Storico completo delle modifiche |
 | [DEPLOY.md](DEPLOY.md) | Guida deploy, infrastruttura e troubleshooting |
 | [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) | Design system Karalisweb v2.2 |
 | [USER-GUIDE.md](USER-GUIDE.md) | Guida utente per collaboratori e admin |
-| [docs/orchestration/](docs/orchestration/) | Documentazione tecnica modulo orchestration |
 
 ---
 
 ## Database
 
-22 modelli Prisma organizzati in 4 aree:
+9 modelli Prisma:
 
-- **Core**: User, Project, ProjectAssignment, TimeEntry, DayStatus, WeeklySubmission
-- **Comunicazione**: ReminderLog, PasswordResetToken
-- **Sicurezza**: OtpToken (2FA)
-- **Orchestration**: OrchProject, ChecklistTemplate, ChecklistItemTemplate, ChecklistInstance, ExecutionTask, Gate, GateRequirement, AsanaWebhookEvent, AppConfig
+- **User** — utente con ruoli, config orari, reminder
+- **Project** — progetto con codice univoco
+- **ProjectAssignment** — assegnazione utente-progetto
+- **TimeEntry** — registrazione ore
+- **DayStatus** — stato giornata
+- **WeeklySubmission** — invio settimanale
+- **ReminderLog** — log reminder inviati
+- **PasswordResetToken** — token reset password
+- **OtpToken** — codici OTP per 2FA
 
 4 ruoli: `admin`, `pm`, `senior`, `executor`
 
@@ -299,4 +284,4 @@ Proprietario: **Karalisweb**
 
 ---
 
-*Ultimo aggiornamento: 2026-02-16*
+*Ultimo aggiornamento: 2026-03-21*

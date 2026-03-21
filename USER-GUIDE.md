@@ -1,7 +1,7 @@
 # KW Time Report - Guida Utente
 
 > Guida completa per collaboratori e amministratori di **KW Time Report**.
-> Versione: **1.2.0**
+> Versione: **1.3.0**
 
 ---
 
@@ -10,13 +10,13 @@
 1. [Accesso](#1-accesso)
 2. [Dashboard Giornaliera](#2-dashboard-giornaliera)
 3. [Inserimento Ore](#3-inserimento-ore)
-4. [Chiusura Giornata](#4-chiusura-giornata)
-5. [Vista Settimanale](#5-vista-settimanale)
-6. [Invio Settimanale](#6-invio-settimanale)
-7. [Impostazioni Profilo](#7-impostazioni-profilo)
-8. [2FA - Autenticazione a Due Fattori](#8-2fa---autenticazione-a-due-fattori)
-9. [Pannello Admin](#9-pannello-admin)
-10. [Project Orchestration](#10-project-orchestration)
+4. [Correzione Errori](#4-correzione-errori)
+5. [Chiusura Giornata](#5-chiusura-giornata)
+6. [Vista Settimanale](#6-vista-settimanale)
+7. [Invio Settimanale](#7-invio-settimanale)
+8. [Impostazioni Profilo](#8-impostazioni-profilo)
+9. [2FA - Autenticazione a Due Fattori](#9-2fa---autenticazione-a-due-fattori)
+10. [Pannello Admin](#10-pannello-admin)
 11. [Reminder Automatici](#11-reminder-automatici)
 
 ---
@@ -50,45 +50,68 @@ Se hai attivato la verifica in due passaggi:
 
 La pagina **Oggi** e la vista principale dell'app. Mostra:
 
-- **Data corrente** con possibilita di navigare tra i giorni
+- **Data corrente** con possibilita di navigare tra i giorni tramite il selettore data
 - **Ore registrate**: totale ore inserite per la giornata
 - **Target giornaliero**: obiettivo di ore da raggiungere (configurato dall'admin)
+- **Barra di progresso**: indica visivamente quanto manca al target
 - **Stato giornata**: Aperto / Chiuso Completo / Chiuso Incompleto
-- **Lista time entry**: tutte le registrazioni della giornata
+- **Lista registrazioni**: tutte le time entry della giornata
 
 ### Navigazione tra giorni
 
-Usa le frecce **sinistra/destra** per spostarti tra i giorni e visualizzare lo storico.
+Usa il **selettore data** in alto a destra per spostarti a qualsiasi giorno passato.
 
 ---
 
 ## 3. Inserimento Ore
 
-### Creare una Time Entry
+### Creare una Registrazione
 
 1. Dalla Dashboard, clicca il pulsante **+ Aggiungi**
 2. Compila i campi:
    - **Progetto**: seleziona il progetto dal menu a tendina (solo i progetti a te assegnati)
-   - **Durata**: inserisci il tempo in ore e minuti
+   - **Durata (minuti)**: inserisci il tempo in minuti (es. 60 per 1 ora)
    - **Note** (opzionale): descrivi brevemente l'attivita svolta
 3. Clicca **Salva**
 
-### Modificare una Time Entry
+### Modificare una Registrazione
 
-1. Clicca sull'entry che vuoi modificare
-2. Modifica i campi desiderati
+1. Clicca l'icona **matita** accanto alla registrazione da modificare
+2. Modifica i campi desiderati (progetto, durata, note)
 3. Clicca **Salva**
 
-### Eliminare una Time Entry
+### Eliminare una Registrazione
 
-1. Clicca sull'icona **cestino** accanto all'entry
+1. Clicca l'icona **cestino** accanto alla registrazione
 2. Conferma l'eliminazione
 
-> **Nota**: Puoi modificare/eliminare le entry solo se la giornata e ancora **aperta**.
+> **Nota**: Puoi modificare/eliminare le registrazioni solo se la giornata e ancora **aperta**. Se la giornata e chiusa, usa il pulsante **Riapri giornata**.
 
 ---
 
-## 4. Chiusura Giornata
+## 4. Correzione Errori
+
+### Ho inserito una registrazione nel giorno sbagliato
+
+Se hai inserito ore nel giorno sbagliato (es. 1 marzo invece di 19 marzo):
+
+1. Vai al giorno dove hai inserito la registrazione per errore
+2. Se la giornata e chiusa, clicca **Riapri giornata**
+3. Clicca l'icona **matita** sulla registrazione da correggere
+4. Nel form di modifica apparira il campo **Data**: cambiala alla data corretta
+5. Clicca **Salva**
+
+La registrazione verra spostata automaticamente al giorno corretto.
+
+### Ho sbagliato progetto, durata o note
+
+1. Clicca la **matita** sulla registrazione
+2. Modifica il campo errato
+3. Clicca **Salva**
+
+---
+
+## 5. Chiusura Giornata
 
 A fine giornata devi chiudere la giornata per confermare le ore inserite.
 
@@ -101,42 +124,49 @@ A fine giornata devi chiudere la giornata per confermare le ore inserite.
 
 ### Cosa succede dopo la chiusura
 
-- Non potrai piu aggiungere o modificare le time entry per quella giornata
+- Non potrai piu aggiungere o modificare le registrazioni per quella giornata
+- Puoi **riaprire** la giornata con il pulsante **Riapri giornata** se necessario
 - La giornata apparira nel riepilogo settimanale con il suo stato
 
 ---
 
-## 5. Vista Settimanale
+## 6. Vista Settimanale
 
 La pagina **Settimana** mostra il riepilogo dell'intera settimana lavorativa:
 
-- **Riepilogo per giorno**: ore registrate, target e stato per ogni giorno
+- **Numero settimana** e range di date (es. "Settimana 12 — 16 mar – 22 mar 2026")
+- **Riepilogo per giorno**: ogni giorno mostra data (dd/MM), ore registrate e stato
 - **Totale settimanale**: somma delle ore della settimana
-- **Target settimanale**: obiettivo calcolato in base ai giorni lavorativi configurati
-- **Stato per giorno**: badge colorati (verde = completo, giallo = incompleto, blu = aperto)
+- **Giornate chiuse**: quante giornate lavorative sono state chiuse
+- **Registrazioni**: numero totale di time entry nella settimana
 
 ### Navigazione tra settimane
 
-Usa le frecce per spostarti tra le settimane e visualizzare lo storico.
+Usa le **frecce sinistra/destra** per spostarti tra le settimane.
+
+### Vai al dettaglio di un giorno
+
+Clicca su una **card giorno** nella griglia settimanale per aprire la Dashboard di quel giorno. Da li puoi vedere le registrazioni e modificarle.
 
 ---
 
-## 6. Invio Settimanale
+## 7. Invio Settimanale
 
 Alla fine della settimana lavorativa, devi inviare il riepilogo settimanale.
 
 ### Come inviare
 
 1. Vai nella pagina **Settimana**
-2. Verifica che tutte le giornate siano chiuse
-3. Clicca il pulsante **Invia settimana**
-4. Il riepilogo viene registrato e sara visibile nella dashboard compliance dell'admin
+2. Naviga alla settimana da inviare
+3. Verifica che tutte le giornate siano chiuse
+4. Clicca il pulsante **Invia settimana**
+5. Controlla il riepilogo nel modal e clicca **Conferma invio**
 
 > **Nota**: L'invio settimanale e irreversibile. Assicurati che tutte le ore siano corrette prima di inviare.
 
 ---
 
-## 7. Impostazioni Profilo
+## 8. Impostazioni Profilo
 
 Dalla pagina **Profilo** (accessibile dalla sidebar o dal menu mobile) puoi:
 
@@ -147,7 +177,7 @@ Dalla pagina **Profilo** (accessibile dalla sidebar o dal menu mobile) puoi:
 
 ---
 
-## 8. 2FA - Autenticazione a Due Fattori
+## 9. 2FA - Autenticazione a Due Fattori
 
 La 2FA aggiunge un livello di sicurezza extra al tuo account.
 
@@ -165,13 +195,13 @@ La 2FA aggiunge un livello di sicurezza extra al tuo account.
 
 ---
 
-## 9. Pannello Admin
+## 10. Pannello Admin
 
 > Visibile solo agli utenti con ruolo **Admin**.
 
 ### Gestione Utenti
 
-**Percorso**: Sidebar > Impostazioni > **Utenti**
+**Percorso**: Sidebar > Amministrazione > **Utenti**
 
 - **Crea utente**: definisci nome, email, password, ruolo (admin/pm/senior/executor)
 - **Configura orari**: imposta giorni lavorativi, orario inizio/fine, target giornaliero in minuti
@@ -180,74 +210,21 @@ La 2FA aggiunge un livello di sicurezza extra al tuo account.
 
 ### Gestione Progetti
 
-**Percorso**: Sidebar > Impostazioni > **Progetti**
+**Percorso**: Sidebar > Amministrazione > **Progetti**
 
-- **Crea progetto**: nome e descrizione
+- **Crea progetto**: nome e codice
 - **Assegna utenti**: seleziona quali utenti possono registrare ore su quel progetto
 - **Modifica/Archivia** progetti
 
 ### Dashboard Compliance
 
-**Percorso**: Sidebar > Orchestration > **Compliance**
+**Percorso**: Sidebar > Amministrazione > **Compliance**
 
 La dashboard compliance mostra una panoramica della situazione di tutti i collaboratori:
 
 - **Lista utenti** con stato compliance (giornate chiuse, settimane inviate)
 - **Vista dettaglio**: clicca su un utente per vedere il suo time report dettagliato
-- **Filtri**: per periodo, stato, utente
 - **Export CSV**: esporta i dati timesheet per uso esterno
-
-### Configurazione Asana
-
-**Percorso**: Sidebar > Impostazioni > **Asana**
-
-- Configura il token di accesso Asana
-- Imposta workspace e progetto predefinito
-- Configura i campi personalizzati per la sincronizzazione
-- Testa la connessione
-
----
-
-## 10. Project Orchestration
-
-> Visibile a utenti con ruolo **Admin**, **PM** o **Senior**.
-
-Il modulo Orchestration gestisce il ciclo di vita dei progetti web con checklist, gate e task.
-
-### Creare un Progetto
-
-**Percorso**: Sidebar > Orchestration > **Workflow**
-
-1. Clicca **Nuovo Progetto**
-2. Compila i dati del progetto
-3. Scegli tra:
-   - **Creazione manuale**: configura checklist e task manualmente
-   - **Creazione con AI**: l'intelligenza artificiale genera automaticamente la struttura del progetto basandosi sulla descrizione
-
-### Checklist
-
-Ogni progetto puo avere piu checklist organizzate per categoria:
-- **SEO**: ottimizzazione per i motori di ricerca
-- **Technical**: aspetti tecnici
-- **Privacy**: conformita privacy e GDPR
-- **Performance**: ottimizzazione prestazioni
-- **Backend**: configurazioni lato server
-- **Other**: altro
-
-### Gate
-
-I progetti hanno 2 gate (checkpoint) principali:
-1. **Published**: il progetto e online/pubblicato
-2. **Delivered**: il progetto e consegnato al cliente
-
-Ogni gate ha dei requisiti che devono essere soddisfatti prima di poter procedere.
-
-### Integrazione Asana
-
-I task di esecuzione possono essere sincronizzati con Asana:
-- I task vengono creati automaticamente come task Asana
-- I webhook mantengono sincronizzato lo stato tra le due piattaforme
-- Le modifiche su Asana vengono riflesse automaticamente in Time Report
 
 ---
 
@@ -281,23 +258,21 @@ In base alla configurazione del tuo profilo, i reminder vengono inviati via:
 | Inserimento ore | Si | Si | Si | Si |
 | Chiusura giornata | Si | Si | Si | Si |
 | Invio settimanale | Si | Si | Si | Si |
-| Vista Orchestration | No | Si | Si | Si |
-| Gestione progetti Orch. | No | No | Si | Si |
 | Dashboard Compliance | No | No | No | Si |
 | Gestione utenti | No | No | No | Si |
 | Gestione progetti | No | No | No | Si |
-| Configurazione Asana | No | No | No | Si |
+| Export CSV | No | No | No | Si |
 
 ---
 
 ## Navigazione
 
 ### Desktop
-- **Sidebar sinistra** con tutte le voci di navigazione organizzate per sezione
+- **Sidebar sinistra** con sezioni TIME TRACKING e AMMINISTRAZIONE (solo admin)
 - Le voci visibili dipendono dal tuo ruolo
 
 ### Mobile
-- **Bottom bar** con le voci principali (Oggi, Settimana, Workflow, Compliance)
+- **Bottom bar** con le voci principali (Oggi, Settimana, Menu)
 - **Menu hamburger** per accedere a opzioni aggiuntive (Admin, Profilo, Logout)
 
 ---
@@ -308,4 +283,4 @@ Per problemi tecnici o richieste di supporto, contatta l'amministratore di siste
 
 ---
 
-*Ultimo aggiornamento: 2026-02-16*
+*Ultimo aggiornamento: 2026-03-21*
