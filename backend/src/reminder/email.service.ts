@@ -101,6 +101,47 @@ Karalisweb`;
     return this.sendEmail(email, subject, text, html);
   }
 
+  async sendPreviousDayReminder(email: string, userName: string, dateStr: string, minutesLogged: number, targetMinutes: number): Promise<boolean> {
+    const subject = `Time Report - Giornata ${dateStr} non chiusa`;
+    const text = `Ciao ${userName},\n\nNon hai ancora chiuso la giornata di ieri (${dateStr}).\nHai registrato ${minutesLogged}/${targetMinutes} minuti.\n\nPer favore compila e chiudi il time report il prima possibile.\n\n---\nKW Time Report`;
+
+    const html = `
+      <h2>Time Report - Reminder</h2>
+      <p>Ciao <strong>${userName}</strong>,</p>
+      <p>Non hai ancora chiuso la giornata di ieri (<strong>${dateStr}</strong>).</p>
+      <p>Hai registrato <strong>${minutesLogged}/${targetMinutes} minuti</strong>.</p>
+      <p><strong>Per favore compila e chiudi il time report il prima possibile!</strong></p>
+      <hr>
+      <p><small>KW Time Report - Karalisweb</small></p>
+    `;
+
+    return this.sendEmail(email, subject, text, html);
+  }
+
+  async sendAdminNotification(email: string, adminName: string, unclosedYesterday: string[], weekNotSubmitted: string[], dateStr: string): Promise<boolean> {
+    const subject = `Time Report - Report Compliance ${dateStr}`;
+
+    let htmlBody = `<h2>Report Compliance — ${dateStr}</h2><p>Ciao <strong>${adminName}</strong>,</p>`;
+
+    if (unclosedYesterday.length > 0) {
+      htmlBody += `<h3>Giornata di ieri non chiusa (${unclosedYesterday.length})</h3><ul>`;
+      htmlBody += unclosedYesterday.map((n) => `<li>${n}</li>`).join('');
+      htmlBody += '</ul>';
+    }
+
+    if (weekNotSubmitted.length > 0) {
+      htmlBody += `<h3>Settimana precedente non inviata (${weekNotSubmitted.length})</h3><ul>`;
+      htmlBody += weekNotSubmitted.map((n) => `<li>${n}</li>`).join('');
+      htmlBody += '</ul>';
+    }
+
+    htmlBody += `<hr><p><small>KW Time Report - Karalisweb</small></p>`;
+
+    const text = `Report Compliance — ${dateStr}\n\nGiornata ieri non chiusa: ${unclosedYesterday.join(', ') || 'nessuno'}\nSettimana non inviata: ${weekNotSubmitted.join(', ') || 'nessuno'}`;
+
+    return this.sendEmail(email, subject, text, htmlBody);
+  }
+
   isEnabled(): boolean {
     return this.transporter !== null;
   }

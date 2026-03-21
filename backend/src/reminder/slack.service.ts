@@ -55,6 +55,28 @@ export class SlackService {
     return this.sendDirectMessage(slackUserId, message);
   }
 
+  async sendPreviousDayReminder(slackUserId: string, userName: string, dateStr: string, minutesLogged: number, targetMinutes: number): Promise<boolean> {
+    const message = `Ciao ${userName}! :alarm_clock:\n\n*Non hai chiuso la giornata di ieri (${dateStr}).*\nHai registrato *${minutesLogged}/${targetMinutes} minuti*.\n\n:pencil: Per favore compila e chiudi il time report di ieri!`;
+
+    return this.sendDirectMessage(slackUserId, message);
+  }
+
+  async sendAdminNotification(slackUserId: string, unclosedYesterday: string[], weekNotSubmitted: string[], dateStr: string): Promise<boolean> {
+    let message = `:bar_chart: *Report Compliance — ${dateStr}*\n`;
+
+    if (unclosedYesterday.length > 0) {
+      message += `\n:warning: *Giornata di ieri non chiusa (${unclosedYesterday.length}):*\n`;
+      message += unclosedYesterday.map((n) => `  • ${n}`).join('\n');
+    }
+
+    if (weekNotSubmitted.length > 0) {
+      message += `\n\n:calendar: *Settimana precedente non inviata (${weekNotSubmitted.length}):*\n`;
+      message += weekNotSubmitted.map((n) => `  • ${n}`).join('\n');
+    }
+
+    return this.sendDirectMessage(slackUserId, message);
+  }
+
   isEnabled(): boolean {
     return this.client !== null;
   }

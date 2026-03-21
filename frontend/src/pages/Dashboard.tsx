@@ -6,6 +6,7 @@ import { TimeEntry, TodaySummary, Project } from '../types';
 import { Plus, Trash2, Edit2, Check, X, Clock, Target, CheckCircle2, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import SearchableSelect from '../components/SearchableSelect';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -316,19 +317,16 @@ export default function Dashboard() {
                 <label className="block text-sm font-medium text-gray-300 mb-1">
                   Progetto
                 </label>
-                <select
+                <SearchableSelect
                   required
                   value={formData.projectId}
-                  onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
-                  className="w-full px-3 py-2 bg-dark-700 border border-dark-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Seleziona...</option>
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} {p.code && `(${p.code})`}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setFormData({ ...formData, projectId: val })}
+                  placeholder="Cerca progetto..."
+                  options={projects.map((p) => ({
+                    value: p.id,
+                    label: `${p.name}${p.code ? ` (${p.code})` : ''}`,
+                  }))}
+                />
               </div>
 
               {editingId && (

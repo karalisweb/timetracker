@@ -56,6 +56,18 @@ export class ReminderController {
     return { message: 'Weekly reminders eseguiti' };
   }
 
+  @Post('trigger/previous-day')
+  async triggerPreviousDay() {
+    await this.reminderJobService.triggerPreviousDayReminders();
+    return { message: 'Previous-day reminders eseguiti' };
+  }
+
+  @Post('trigger/admin-notifications')
+  async triggerAdminNotifications() {
+    await this.reminderJobService.triggerAdminNotifications();
+    return { message: 'Admin notifications eseguite' };
+  }
+
   @Post('test/slack')
   async testSlack() {
     if (!this.slackService.isEnabled()) {

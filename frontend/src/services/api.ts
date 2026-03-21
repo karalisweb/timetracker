@@ -85,6 +85,11 @@ export const projectsApi = {
   getAssigned: () => api.get('/projects/assigned'),
 };
 
+// Notifications
+export const notificationsApi = {
+  getPending: () => api.get('/notifications/pending').then(res => res.data),
+};
+
 // Admin
 export const adminApi = {
   // Users

@@ -1,7 +1,7 @@
 # CLAUDE.md — Mappa del Codice
 
 > Questo file serve per orientarsi nel progetto senza leggere tutto il codice.
-> Aggiornato alla versione **1.3.0**.
+> Aggiornato alla versione **1.3.1**.
 
 ---
 

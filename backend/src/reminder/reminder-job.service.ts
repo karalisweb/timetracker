@@ -41,6 +41,18 @@ export class ReminderJobService implements OnModuleInit {
       await this.reminderService.checkWeeklyReminders();
     });
 
+    // Previous day reminder: ogni mattina alle 9:30 (lun-ven)
+    cron.schedule('30 9 * * 1-5', async () => {
+      this.logger.log('Trigger previous-day reminders');
+      await this.reminderService.checkPreviousDayReminders();
+    });
+
+    // Admin notification: ogni mattina alle 10:00 (lun-ven)
+    cron.schedule('0 10 * * 1-5', async () => {
+      this.logger.log('Trigger admin notifications');
+      await this.reminderService.checkAdminNotifications();
+    });
+
     this.logger.log('Cron jobs schedulati');
   }
 
@@ -56,5 +68,13 @@ export class ReminderJobService implements OnModuleInit {
 
   async triggerWeeklyReminders() {
     return this.reminderService.checkWeeklyReminders();
+  }
+
+  async triggerPreviousDayReminders() {
+    return this.reminderService.checkPreviousDayReminders();
+  }
+
+  async triggerAdminNotifications() {
+    return this.reminderService.checkAdminNotifications();
   }
 }

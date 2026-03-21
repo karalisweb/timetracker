@@ -4,6 +4,7 @@ import { Clock, Calendar, Users, FolderKanban, BarChart3, LogOut, X, UserCircle 
 import { useState } from 'react';
 import Header from './Header';
 import BottomNav from './BottomNav';
+import NotificationBanner from './NotificationBanner';
 
 export default function Layout() {
   const { user, logout, isAdmin } = useAuth();
@@ -62,7 +63,7 @@ export default function Layout() {
               KW Time Report
             </span>
             <span className="text-xs text-dark-500">
-              v1.3.0
+              v1.3.1
             </span>
           </div>
         </div>
@@ -214,7 +215,7 @@ export default function Layout() {
               </div>
 
               <div className="pt-4 text-center">
-                <p className="text-xs text-dark-500">KW Time Report v1.3.0</p>
+                <p className="text-xs text-dark-500">KW Time Report v1.3.1</p>
               </div>
             </div>
           </>
@@ -222,6 +223,7 @@ export default function Layout() {
 
         {/* Page content */}
         <main className="flex-1 p-4 sm:p-6 overflow-auto overflow-x-hidden pb-20 md:pb-6">
+          <NotificationBanner />
           <Outlet />
         </main>
 

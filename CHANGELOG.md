@@ -6,6 +6,18 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/) e i
 
 ---
 
+## [1.3.1] - 2026-03-21
+
+### Aggiunto
+- **Reminder giorno precedente**: cron job (9:30 lun-ven) che invia sollecito via Slack/Email se il giorno precedente non e stato chiuso
+- **Notifiche admin**: cron job (10:00 lun-ven) che invia riepilogo compliance agli admin (giornate non chiuse, settimane non inviate)
+- **Banner notifiche in-app**: all'apertura dell'app mostra avvisi se il giorno precedente non e stato chiuso o la settimana precedente non e stata inviata; per admin mostra anche gli utenti non in regola
+- **Select progetto ricercabile**: il dropdown progetto nel form time entry e ora ricercabile con filtro testuale (SearchableSelect)
+- **API `GET /notifications/pending`**: endpoint per ottenere le notifiche pendenti dell'utente corrente
+- **Trigger admin per reminder**: endpoint `POST /admin/reminders/trigger/previous-day` e `trigger/admin-notifications`
+
+---
+
 ## [1.3.0] - 2026-03-21
 
 ### Aggiunto
