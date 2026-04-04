@@ -207,7 +207,7 @@ export default function Login() {
         <h1
           className="text-center text-[1.75rem] font-semibold mb-1"
           style={{
-            background: 'linear-gradient(135deg, #d4a726, #2d7d9a)',
+            background: 'linear-gradient(135deg, #d4a726, #ff8f65)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
