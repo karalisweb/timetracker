@@ -27,7 +27,8 @@
 
 1. Vai su **https://timereport.karalisdemo.it**
 2. Inserisci **email** e **password**
-3. Clicca **Accedi**
+3. Se hai dimenticato la password, clicca **Password dimenticata?** (sopra il campo password)
+4. Clicca **Accedi**
 
 ### Login con 2FA
 

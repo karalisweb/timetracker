@@ -413,65 +413,43 @@ La scala di riferimento e basata su quella di Tailwind CSS.
 
 ### 6.1 Login
 
-La pagina di login segue lo standard Karalisweb, adattata per Time Report.
+La pagina di login segue lo stile PMI Karalisweb: box stretto e lungo, ombra leggera, bordo sottile.
 
 ```
-+------------------------------------------+
-|                                          |
-|          [Logo KW negativo]              |
-|                                          |
-|          Time Report                     |
-|          Gestione ore e presenze         |
-|                                          |
-|   Email                                 |
-|   [________________________]             |
-|                                          |
-|   Password                              |
-|   [________________________]             |
-|                                          |
-|   [====== Accedi ========]              |
-|                                          |
-|       Password dimenticata?              |
-|                                          |
-|     Karalisweb - Time Report vX.Y.Z     |
-+------------------------------------------+
++--------------------------------------+
+|                                      |
+|        [Logo KW giallo]             |
+|                                      |
+|        KW Time Report               |
+|   Gestione Ore e Presenze | v1.4.0  |
+|                                      |
+|   Email                             |
+|   [__________________________]       |
+|                                      |
+|   Password    Password dimenticata? |
+|   [__________________________]       |
+|                                      |
+|   [======== Accedi =========]       |
+|                                      |
++--------------------------------------+
 ```
 
 **Container pagina**:
 ```html
-<div class="min-h-screen flex items-center justify-center bg-dark-950 p-8">
+<div class="min-h-screen flex items-center justify-center px-4" style="background: #0d1521">
 ```
 
-**Box login**:
-```html
-<div class="bg-dark-900 border border-dark-700 rounded-xl p-8
-            w-full max-w-md shadow-lg">
-```
+**Box login**: max-w-[380px], rounded-xl, py-10 px-8, ombra leggera (`0 4px 16px`), bordo `rgba(255,255,255,0.06)`
 
-**Logo**: Logo negativo KW, max-width 180px, centrato, mb-8
+**Logo**: Logo giallo KW (`logo-kw-giallo.png`), max-width 160px, centrato, mb-6
 
-**Titolo app**:
-```html
-<h1 class="text-2xl font-semibold text-brand-teal text-center">
-    Time Report
-</h1>
-```
+**Titolo app**: gradiente oro-teal (`#d4a726` > `#2d7d9a`), font-semibold, 1.75rem
 
-**Sottotitolo**:
-```html
-<p class="text-dark-400 text-sm text-center mt-2">
-    Gestione ore e presenze
-</p>
-```
+**Sottotitolo**: `Gestione Ore e Presenze | vX.Y.Z` in `#a1a1aa`, 0.85rem
 
-**Bottone Accedi**: gradiente `gradient-brand`, `w-full`, `rounded-full`
+**Password dimenticata**: posizionato sulla stessa riga della label "Password", allineato a destra, `text-xs`
 
-**Link "Password dimenticata?"**:
-```html
-<a class="text-brand-orange text-sm hover:text-brand-orange-dark">
-    Password dimenticata?
-</a>
-```
+**Bottone Accedi**: gradiente `#d4a726` > `#ff8f65`, `w-full`, rounded-lg, hover translateY(-2px)
 
 ### 6.2 Verifica 2FA (OTP)
 

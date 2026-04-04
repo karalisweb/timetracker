@@ -63,7 +63,7 @@ export default function Layout() {
               KW Time Report
             </span>
             <span className="text-xs text-dark-500">
-              v1.3.1
+              v1.4.0
             </span>
           </div>
         </div>
@@ -215,7 +215,7 @@ export default function Layout() {
               </div>
 
               <div className="pt-4 text-center">
-                <p className="text-xs text-dark-500">KW Time Report v1.3.1</p>
+                <p className="text-xs text-dark-500">KW Time Report v1.4.0</p>
               </div>
             </div>
           </>

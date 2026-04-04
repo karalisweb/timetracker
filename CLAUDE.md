@@ -1,7 +1,7 @@
 # CLAUDE.md — Mappa del Codice
 
 > Questo file serve per orientarsi nel progetto senza leggere tutto il codice.
-> Aggiornato alla versione **1.3.1**.
+> Aggiornato alla versione **1.4.0**.
 
 ---
 
@@ -181,4 +181,4 @@ cd backend && npm run test:e2e           # Integration test API
 
 ---
 
-*Ultimo aggiornamento: 2026-03-21*
+*Ultimo aggiornamento: 2026-04-04*

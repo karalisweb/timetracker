@@ -6,6 +6,17 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/) e i
 
 ---
 
+## [1.4.0] - 2026-04-04
+
+### Modificato
+- **Redesign pagina Login**: layout ridisegnato ispirato allo stile PMI Karalisweb — box stretto e lungo, ombra leggera, bordo sottile
+- **Logo giallo**: sostituito il logo negativo con il logo giallo Karalisweb sulla pagina di login
+- **Versione visibile nel login**: aggiunta indicazione versione app sotto il titolo (`Gestione Ore e Presenze | v1.4.0`)
+- **Password dimenticata riposizionato**: il link "Password dimenticata?" e ora posizionato accanto alla label "Password", sopra il campo di input (come nello stile PMI)
+- **Placeholder email aggiornato**: ora mostra `nome@karalisweb.net` come esempio
+
+---
+
 ## [1.3.1] - 2026-03-21
 
 ### Aggiunto

@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, Mail, Loader2 } from 'lucide-react';
 
+const APP_VERSION = '1.4.0';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -55,17 +57,49 @@ export default function Login() {
     setError('');
   };
 
+  // Stile input condiviso
+  const inputStyle = {
+    background: '#1a2d44',
+    border: '1px solid #2a2a35',
+    color: '#f5f5f7',
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = '#d4a726';
+    e.target.style.boxShadow = '0 0 0 3px rgba(212, 167, 38, 0.1)';
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = '#2a2a35';
+    e.target.style.boxShadow = 'none';
+  };
+
+  const buttonHoverIn = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!(e.target as HTMLButtonElement).disabled) {
+      (e.target as HTMLElement).style.transform = 'translateY(-2px)';
+      (e.target as HTMLElement).style.boxShadow = '0 4px 12px rgba(212, 167, 38, 0.3)';
+    }
+  };
+
+  const buttonHoverOut = (e: React.MouseEvent<HTMLButtonElement>) => {
+    (e.target as HTMLElement).style.transform = 'translateY(0)';
+    (e.target as HTMLElement).style.boxShadow = 'none';
+  };
+
+  // Box container condiviso
+  const boxStyle = {
+    background: '#132032',
+    border: '1px solid rgba(255, 255, 255, 0.06)',
+    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+  };
+
   // Form verifica OTP per 2FA
   if (twoFactorState?.required) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-8" style={{ background: '#0d1521' }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#0d1521' }}>
         <div
-          className="w-full max-w-[400px] rounded-xl p-12"
-          style={{
-            background: '#132032',
-            border: '1px solid #2a2a35',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
-          }}
+          className="w-full max-w-[380px] rounded-xl py-10 px-8"
+          style={boxStyle}
         >
           {/* Icona OTP */}
           <div className="flex items-center justify-center mb-6">
@@ -88,7 +122,7 @@ export default function Login() {
           >
             Verifica in due passaggi
           </h1>
-          <p className="text-center text-[0.9rem] mb-8" style={{ color: '#a1a1aa' }}>
+          <p className="text-center text-[0.85rem] mb-8" style={{ color: '#a1a1aa' }}>
             Inserisci il codice inviato a{' '}
             <span className="font-medium" style={{ color: '#d4a726' }}>{twoFactorState.otpEmail}</span>
           </p>
@@ -101,9 +135,9 @@ export default function Login() {
             Abbiamo inviato un codice a 6 cifre alla tua email. Il codice è valido per 10 minuti.
           </p>
 
-          <form onSubmit={handleOtpSubmit} className="space-y-4">
+          <form onSubmit={handleOtpSubmit} className="space-y-5">
             <div>
-              <label htmlFor="otp" className="block text-sm font-medium mb-1" style={{ color: '#a1a1aa' }}>
+              <label htmlFor="otp" className="block text-sm font-medium mb-1.5" style={{ color: '#a1a1aa' }}>
                 Codice OTP
               </label>
               <input
@@ -116,19 +150,9 @@ export default function Login() {
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 className="w-full px-4 py-3 rounded-lg text-center text-xl tracking-widest font-mono focus:outline-none"
-                style={{
-                  background: '#1a2d44',
-                  border: '1px solid #2a2a35',
-                  color: '#f5f5f7',
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#d4a726';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#2a2a35';
-                  e.target.style.boxShadow = 'none';
-                }}
+                style={inputStyle}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
                 placeholder="000000"
               />
             </div>
@@ -137,19 +161,9 @@ export default function Login() {
               type="submit"
               disabled={isLoading || otpCode.length !== 6}
               className="w-full py-3 px-4 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              style={{
-                background: 'linear-gradient(135deg, #d4a726, #ff8f65)',
-              }}
-              onMouseOver={(e) => {
-                if (!(e.target as HTMLButtonElement).disabled) {
-                  (e.target as HTMLElement).style.transform = 'translateY(-2px)';
-                  (e.target as HTMLElement).style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
-                }
-              }}
-              onMouseOut={(e) => {
-                (e.target as HTMLElement).style.transform = 'translateY(0)';
-                (e.target as HTMLElement).style.boxShadow = 'none';
-              }}
+              style={{ background: 'linear-gradient(135deg, #d4a726, #ff8f65)' }}
+              onMouseOver={buttonHoverIn}
+              onMouseOut={buttonHoverOut}
             >
               {isLoading ? 'Verifica in corso...' : 'Verifica e accedi'}
             </button>
@@ -172,29 +186,24 @@ export default function Login() {
     );
   }
 
-  // Form login normale - stile Karalisweb Design System (come CashFlow)
+  // Form login — stile PMI Karalisweb (stretto e lungo, ombra leggera)
   return (
-    <div className="min-h-screen flex items-center justify-center px-8" style={{ background: '#0d1521' }}>
-      {/* Login Box - Ref: DESIGN-SYSTEM.md sezione 6.1 */}
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#0d1521' }}>
       <div
-        className="w-full max-w-[400px] rounded-xl p-12"
-        style={{
-          background: '#132032',
-          border: '1px solid #2a2a35',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
-        }}
+        className="w-full max-w-[380px] rounded-xl py-10 px-8"
+        style={boxStyle}
       >
-        {/* Logo negativo Karalisweb (giallo su sfondo scuro) */}
-        <div className="flex justify-center mb-8">
+        {/* Logo giallo Karalisweb */}
+        <div className="flex justify-center mb-6">
           <img
-            src="/logo-kw-negativo.png"
+            src="/logo-kw-giallo.png"
             alt="Karalisweb"
             className="h-auto"
-            style={{ maxWidth: '180px' }}
+            style={{ maxWidth: '160px' }}
           />
         </div>
 
-        {/* Titolo app con gradiente oro > teal */}
+        {/* Titolo app con gradiente */}
         <h1
           className="text-center text-[1.75rem] font-semibold mb-1"
           style={{
@@ -205,17 +214,20 @@ export default function Login() {
         >
           KW Time Report
         </h1>
-        <p className="text-center text-[0.9rem] mb-8" style={{ color: '#a1a1aa' }}>
-          Gestione Ore e Presenze
+
+        {/* Descrizione + versione */}
+        <p className="text-center text-[0.85rem] mb-8" style={{ color: '#a1a1aa' }}>
+          Gestione Ore e Presenze&nbsp;&nbsp;|&nbsp;&nbsp;v{APP_VERSION}
         </p>
 
         {error && (
           <div className="text-sm text-center mb-4" style={{ color: '#ef4444' }}>{error}</div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: '#a1a1aa' }}>
+            <label htmlFor="email" className="block text-sm font-medium mb-1.5" style={{ color: '#a1a1aa' }}>
               Email
             </label>
             <input
@@ -225,27 +237,29 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-lg focus:outline-none transition-all"
-              style={{
-                background: '#1a2d44',
-                border: '1px solid #2a2a35',
-                color: '#f5f5f7',
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#d4a726';
-                e.target.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#2a2a35';
-                e.target.style.boxShadow = 'none';
-              }}
-              placeholder="email@esempio.com"
+              style={inputStyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              placeholder="nome@karalisweb.net"
             />
           </div>
 
+          {/* Password — label + "Password dimenticata?" sulla stessa riga */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1" style={{ color: '#a1a1aa' }}>
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="password" className="text-sm font-medium" style={{ color: '#a1a1aa' }}>
+                Password
+              </label>
+              <Link
+                to="/forgot-password"
+                className="text-xs transition-colors"
+                style={{ color: '#a1a1aa' }}
+                onMouseOver={(e) => (e.currentTarget.style.color = '#d4a726')}
+                onMouseOut={(e) => (e.currentTarget.style.color = '#a1a1aa')}
+              >
+                Password dimenticata?
+              </Link>
+            </div>
             <input
               id="password"
               type="password"
@@ -253,40 +267,21 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 rounded-lg focus:outline-none transition-all"
-              style={{
-                background: '#1a2d44',
-                border: '1px solid #2a2a35',
-                color: '#f5f5f7',
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#d4a726';
-                e.target.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#2a2a35';
-                e.target.style.boxShadow = 'none';
-              }}
+              style={inputStyle}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               placeholder="••••••••"
             />
           </div>
 
+          {/* Pulsante Accedi */}
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            style={{
-              background: 'linear-gradient(135deg, #d4a726, #ff8f65)',
-            }}
-            onMouseOver={(e) => {
-              if (!(e.target as HTMLButtonElement).disabled) {
-                (e.target as HTMLElement).style.transform = 'translateY(-2px)';
-                (e.target as HTMLElement).style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
-              }
-            }}
-            onMouseOut={(e) => {
-              (e.target as HTMLElement).style.transform = 'translateY(0)';
-              (e.target as HTMLElement).style.boxShadow = 'none';
-            }}
+            className="w-full py-3 px-4 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-2"
+            style={{ background: 'linear-gradient(135deg, #d4a726, #ff8f65)' }}
+            onMouseOver={buttonHoverIn}
+            onMouseOut={buttonHoverOut}
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
@@ -296,18 +291,6 @@ export default function Login() {
             ) : 'Accedi'}
           </button>
         </form>
-
-        <div className="text-center mt-4">
-          <Link
-            to="/forgot-password"
-            className="text-sm transition-colors"
-            style={{ color: '#a1a1aa' }}
-            onMouseOver={(e) => (e.currentTarget.style.color = '#d4a726')}
-            onMouseOut={(e) => (e.currentTarget.style.color = '#a1a1aa')}
-          >
-            Password dimenticata?
-          </Link>
-        </div>
       </div>
     </div>
   );
